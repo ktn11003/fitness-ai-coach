@@ -1,201 +1,161 @@
 console.log("Fitness AI Coach loaded");
 
 /* ===============================
-   GLOBAL CONSTANTS & STATE
+   CONSTANTS + STATE
 ================================ */
 const TARGET_DATE = new Date("2026-03-31");
-
-const state = {
-  // Workout
-  workoutStartedAt: null,
-  workoutEndedAt: null,
-  sets: [],
-  dayIndex: 0,
-
-  // Nutrition
-  baseCalories: 3300,
-  caloriesConsumed: 0,
-
-  // Water
-  bodyWeightKg: 50,
-  waterConsumed: 0
-};
-
-/* ===============================
-   DATE RENDERING
-================================ */
-function renderDates() {
-  const today = new Date();
-
-  document.getElementById("todayDate").innerText =
-    "Today: " + today.toDateString();
-
-  document.getElementById("targetDate").innerText =
-    TARGET_DATE.toDateString();
-}
-
-/* ===============================
-   WORKOUT PLAN ENGINE
-================================ */
 const split = ["Push", "Pull", "Legs"];
-
 const workoutTemplates = {
   Push: ["Bench Press", "Overhead Press", "Triceps Pushdown"],
   Pull: ["Pull Ups", "Barbell Row", "Biceps Curl"],
   Legs: ["Squat", "Leg Press", "Hamstring Curl"]
 };
 
-function generateWorkoutPlan() {
-  const dayType = split[state.dayIndex % split.length];
-  const list = document.getElementById("workoutPlan");
-  list.innerHTML = "";
+let sessionLog = {
+  start: null,
+  end: null,
+  sets: []
+};
 
-  workoutTemplates[dayType].forEach(exercise => {
-    const li = document.createElement("li");
-    li.innerText = `${exercise} — 3 sets × 15 reps`;
-    list.appendChild(li);
+/* ===============================
+   RENDER INITIAL UI
+================================ */
+function init() {
+  renderDates();
+  generateWorkoutUI();
+}
+
+function renderDates() {
+  const today = new Date();
+  document.getElementById("todayDate").innerText = 
+    today.toLocaleDateString("en-IN", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "Asia/Kolkata"
+    });
+
+  document.getElementById("targetDate").innerText =
+    TARGET_DATE.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+}
+
+function generateWorkoutUI() {
+  const dayType = split[new Date().getDate() % split.length];
+  document.getElementById("workoutType").innerText = `${dayType} Day`;
+
+  const form = document.getElementById("workoutForm");
+  form.innerHTML = "";
+
+  const exercises = workoutTemplates[dayType];
+  exercises.forEach((ex, idx) => {
+    for (let s = 1; s <= 3; s++) {
+      const row = document.createElement("div");
+      row.className = "set-row";
+      row.innerHTML = `
+        <label>${ex} S${s}</label>
+        <input type="number" min="0" placeholder="reps" 
+          onchange="recordSet(${idx}, ${s}, this)">
+      `;
+      form.appendChild(row);
+    }
   });
 }
 
 /* ===============================
-   DIET ENGINE
+   LOGIC — WORKOUT TRACKING
 ================================ */
-function generateDietPlan() {
-  const meals = [
-    { name: "Breakfast", pct: 0.25 },
-    { name: "Lunch", pct: 0.35 },
-    { name: "Dinner", pct: 0.40 }
-  ];
-
-  document.getElementById("calorieTarget").innerText =
-    state.baseCalories;
-
-  const list = document.getElementById("dietPlan");
-  list.innerHTML = "";
-
-  meals.forEach(meal => {
-    const calories = Math.round(state.baseCalories * meal.pct);
-    const li = document.createElement("li");
-    li.innerText = `${meal.name}: ${calories} kcal`;
-    list.appendChild(li);
-  });
-}
-
-function logCalories() {
-  const input = document.getElementById("calorieInput");
-  const value = Number(input.value);
-
-  if (!value) return;
-
-  state.caloriesConsumed += value;
-  input.value = "";
-
-  const diff = state.caloriesConsumed - state.baseCalories;
-
-  document.getElementById("calorieStatus").innerText =
-    diff >= 0
-      ? `Surplus: +${diff} kcal`
-      : `Deficit: ${diff} kcal`;
-
-  generateAIRecommendations();
-}
-
-/* ===============================
-   WATER ENGINE
-================================ */
-function calculateWaterTarget() {
-  let target = state.bodyWeightKg * 35;
-
-  if (state.workoutStartedAt && state.workoutEndedAt) {
-    const durationMin =
-      (state.workoutEndedAt - state.workoutStartedAt) / 60000;
-
-    if (durationMin > 45) target += 500;
+function recordSet(exIdx, setNum, inputEl) {
+  const reps = Number(inputEl.value);
+  if (!sessionLog.start && reps > 0) {
+    sessionLog.start = new Date();
   }
 
-  document.getElementById("waterTarget").innerText = target;
-}
+  if (reps <= 0) return; // ignore clears
 
-function logWater() {
-  state.waterConsumed += 250;
-  document.getElementById("waterConsumed").innerText =
-    state.waterConsumed;
-
-  generateAIRecommendations();
-}
-
-/* ===============================
-   WORKOUT SESSION TRACKING
-================================ */
-function logSet() {
   const now = new Date();
+  sessionLog.sets.push({
+    exerciseIndex: exIdx,
+    set: setNum,
+    reps: reps,
+    loggedAt: now.toISOString()
+  });
 
-  if (!state.workoutStartedAt) {
-    state.workoutStartedAt = now;
-    document.getElementById("startTime").innerText =
-      now.toLocaleTimeString();
-  }
+  sessionLog.end = now;
 
-  state.sets.push(now);
-  state.workoutEndedAt = now;
-
-  document.getElementById("endTime").innerText =
-    now.toLocaleTimeString();
-
-  updateDuration();
-  calculateWaterTarget();
-  generateAIRecommendations();
+  renderSessionInfo();
 }
 
-function updateDuration() {
-  const diff =
-    state.workoutEndedAt - state.workoutStartedAt;
+function renderSessionInfo() {
+  if (!sessionLog.start) return;
 
-  const minutes = Math.floor(diff / 60000);
-  const seconds = Math.floor((diff % 60000) / 1000);
+  document.getElementById("startTime").innerText =
+    new Date(sessionLog.start).toLocaleTimeString("en-IN", {timeZone:"Asia/Kolkata"});
 
-  document.getElementById("duration").innerText =
-    `${minutes} min ${seconds} sec`;
+  if (sessionLog.end) {
+    document.getElementById("endTime").innerText =
+      new Date(sessionLog.end).toLocaleTimeString("en-IN", {timeZone:"Asia/Kolkata"});
+
+    const diff = new Date(sessionLog.end) - new Date(sessionLog.start);
+    const min = Math.floor(diff / 60000);
+    const sec = Math.floor((diff % 60000) / 1000);
+    document.getElementById("duration").innerText =
+      `${min} min ${sec} sec`;
+
+    renderAvgRest();
+  }
+
+  generateAIFeedback();
+}
+
+function renderAvgRest() {
+  if (sessionLog.sets.length < 2) {
+    document.getElementById("avgRest").innerText = "–";
+    return;
+  }
+
+  let totalRest = 0, count = 0;
+  for (let i = 1; i < sessionLog.sets.length; i++) {
+    const prev = new Date(sessionLog.sets[i-1].loggedAt);
+    const cur = new Date(sessionLog.sets[i].loggedAt);
+    totalRest += (cur - prev);
+    count++;
+  }
+  const avgMs = totalRest / count;
+  const avgMin = Math.floor(avgMs / 60000);
+  const avgSec = Math.floor((avgMs % 60000) / 1000);
+  document.getElementById("avgRest").innerText =
+    `${avgMin}m ${avgSec}s`;
 }
 
 /* ===============================
-   MOCK LLM RECOMMENDATIONS
+   MOCK AI FEEDBACK
 ================================ */
-function generateAIRecommendations() {
-  const list = document.getElementById("aiRecommendations");
+function generateAIFeedback() {
+  const list = document.getElementById("aiFeedback");
   list.innerHTML = "";
 
-  const recommendations = [];
+  const notes = [];
 
-  if (state.caloriesConsumed < state.baseCalories) {
-    recommendations.push(
-      "You are below your calorie target. Increase portion size in the next meal."
-    );
-  }
-
-  const waterTarget = state.bodyWeightKg * 35;
-  if (state.waterConsumed < 0.7 * waterTarget) {
-    recommendations.push(
-      "Hydration is low. Increase water intake to support recovery."
-    );
-  }
-
-  if (state.workoutStartedAt && state.workoutEndedAt) {
-    const duration =
-      (state.workoutEndedAt - state.workoutStartedAt) / 60000;
-
-    if (duration < 30) {
-      recommendations.push(
-        "Workout duration is short. Consider increasing rest or volume."
-      );
+  if (!sessionLog.start) {
+    notes.push("Start logging your sets to begin analysis.");
+  } else {
+    const totalReps = sessionLog.sets.reduce((a,b) => a + b.reps, 0);
+    if (totalReps < 30) {
+      notes.push("Your volume is low — consider pacing up gradually.");
+    }
+    if (sessionLog.sets.length > 0) {
+      notes.push("Keep consistent rest between sets for better performance.");
     }
   }
 
-  recommendations.push(
-    "If fatigue is high tomorrow, reduce training volume by 5–10%."
-  );
+  notes.push("Recommendations will improve when backend AI is integrated.");
 
-  recommendations.forEach(text => {
+  notes.forEach(text => {
     const li = document.createElement("li");
     li.innerText = text;
     list.appendChild(li);
@@ -203,10 +163,10 @@ function generateAIRecommendations() {
 }
 
 /* ===============================
-   INIT
+   SUBMIT BUTTON
 ================================ */
-renderDates();
-generateWorkoutPlan();
-generateDietPlan();
-calculateWaterTarget();
-generateAIRecommendations();
+function submitWorkout() {
+  alert("Workout logged locally. Future steps will save this to backend.");
+}
+
+init();
