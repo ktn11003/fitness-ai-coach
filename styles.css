@@ -1,36 +1,113 @@
-body {
+/* ---------- RESET + BASE ---------- */
+* {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
 }
 
-header {
-  padding: 16px 20px;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 18px;
-  font-weight: 600;
+body {
+  background: #f7f9fc;
+  color: #1a1f36;
+  min-height: 100vh;
+  line-height: 1.6;
 }
 
-nav {
-  display: flex;
-  gap: 20px;
-  padding: 12px 20px;
-  border-bottom: 1px solid #e5e7eb;
+.header {
+  background: #161b30;
+  color: #fff;
+  padding: 24px 16px;
+  text-align: center;
 }
 
-nav span {
-  cursor: pointer;
-  color: #64748b;
+.header h1 {
+  font-size: 22px;
+  margin-bottom: 4px;
 }
 
-nav span.active {
-  color: #2563eb;
-  font-weight: 600;
+.header .target-date {
+  font-size: 14px;
+  opacity: 0.8;
 }
 
-main {
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 16px;
+}
+
+/* ---------- CARD COMPONENT ---------- */
+.card {
+  background: #fff;
+  border-radius: 12px;
   padding: 20px;
-  max-width: 1000px;
-  margin: auto;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* ---------- WORKOUT FORM ---------- */
+.workout-card h2 {
+  margin-bottom: 12px;
+  font-size: 20px;
+}
+
+.workout-type {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.workout-form .set-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.workout-form .set-row label {
+  flex: 0 0 90px;
+  font-size: 15px;
+}
+
+.workout-form .set-row input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 15px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  margin-left: 12px;
+}
+
+.btn-primary {
+  width: 100%;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #1e4bb8;
+}
+
+/* ---------- INFO BLOCKS ---------- */
+.workout-info p {
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* ---------- AI LIST ---------- */
+.ai-card h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.ai-list {
+  list-style: disc;
+  padding-left: 18px;
+  font-size: 14px;
 }
