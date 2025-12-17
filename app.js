@@ -20,10 +20,14 @@ const state = {
 
 /* ---------- DATE ---------- */
 function renderDate() {
-  document.getElementById("todayDate").innerText =
-    "Today: " + new Date().toDateString();
-}
+  const today = new Date();
 
+  document.getElementById("todayDate").innerText =
+    "Today: " + today.toDateString();
+
+  document.getElementById("targetDate").innerText =
+    TARGET_DATE.toDateString();
+}
 /* ---------- WORKOUT ENGINE ---------- */
 const split = ["Push", "Pull", "Legs"];
 const workoutTemplates = {
