@@ -1,9 +1,12 @@
 console.log("Fitness AI Coach loaded");
 
-/* ---------- STATE ---------- */
+/* ===============================
+   GLOBAL CONSTANTS & STATE
+================================ */
 const TARGET_DATE = new Date("2026-03-31");
 
 const state = {
+  // Workout
   workoutStartedAt: null,
   workoutEndedAt: null,
   sets: [],
@@ -18,8 +21,10 @@ const state = {
   waterConsumed: 0
 };
 
-/* ---------- DATE ---------- */
-function renderDate() {
+/* ===============================
+   DATE RENDERING
+================================ */
+function renderDates() {
   const today = new Date();
 
   document.getElementById("todayDate").innerText =
@@ -28,8 +33,12 @@ function renderDate() {
   document.getElementById("targetDate").innerText =
     TARGET_DATE.toDateString();
 }
-/* ---------- WORKOUT ENGINE ---------- */
+
+/* ===============================
+   WORKOUT PLAN ENGINE
+================================ */
 const split = ["Push", "Pull", "Legs"];
+
 const workoutTemplates = {
   Push: ["Bench Press", "Overhead Press", "Triceps Pushdown"],
   Pull: ["Pull Ups", "Barbell Row", "Biceps Curl"],
@@ -37,18 +46,20 @@ const workoutTemplates = {
 };
 
 function generateWorkoutPlan() {
-  const dayType = split[state.dayIndex % 3];
+  const dayType = split[state.dayIndex % split.length];
   const list = document.getElementById("workoutPlan");
   list.innerHTML = "";
 
-  workoutTemplates[dayType].forEach(ex => {
+  workoutTemplates[dayType].forEach(exercise => {
     const li = document.createElement("li");
-    li.innerText = `${ex} — 3 x 15`;
+    li.innerText = `${exercise} — 3 sets × 15 reps`;
     list.appendChild(li);
   });
 }
 
-/* ---------- DIET ENGINE ---------- */
+/* ===============================
+   DIET ENGINE
+================================ */
 function generateDietPlan() {
   const meals = [
     { name: "Breakfast", pct: 0.25 },
@@ -62,41 +73,45 @@ function generateDietPlan() {
   const list = document.getElementById("dietPlan");
   list.innerHTML = "";
 
-  meals.forEach(m => {
-    const calories = Math.round(state.baseCalories * m.pct);
+  meals.forEach(meal => {
+    const calories = Math.round(state.baseCalories * meal.pct);
     const li = document.createElement("li");
-    li.innerText = `${m.name}: ${calories} kcal`;
+    li.innerText = `${meal.name}: ${calories} kcal`;
     list.appendChild(li);
   });
 }
 
 function logCalories() {
-  const val = Number(document.getElementById("calorieInput").value);
-  if (!val) return;
+  const input = document.getElementById("calorieInput");
+  const value = Number(input.value);
 
-  state.caloriesConsumed += val;
+  if (!value) return;
+
+  state.caloriesConsumed += value;
+  input.value = "";
 
   const diff = state.caloriesConsumed - state.baseCalories;
-  const status =
+
+  document.getElementById("calorieStatus").innerText =
     diff >= 0
       ? `Surplus: +${diff} kcal`
       : `Deficit: ${diff} kcal`;
 
-  document.getElementById("calorieStatus").innerText = status;
-
   generateAIRecommendations();
 }
 
-/* ---------- WATER ENGINE ---------- */
+/* ===============================
+   WATER ENGINE
+================================ */
 function calculateWaterTarget() {
   let target = state.bodyWeightKg * 35;
 
-  const durationMin =
-    state.workoutStartedAt && state.workoutEndedAt
-      ? (state.workoutEndedAt - state.workoutStartedAt) / 60000
-      : 0;
+  if (state.workoutStartedAt && state.workoutEndedAt) {
+    const durationMin =
+      (state.workoutEndedAt - state.workoutStartedAt) / 60000;
 
-  if (durationMin > 45) target += 500;
+    if (durationMin > 45) target += 500;
+  }
 
   document.getElementById("waterTarget").innerText = target;
 }
@@ -109,7 +124,9 @@ function logWater() {
   generateAIRecommendations();
 }
 
-/* ---------- WORKOUT SESSION ---------- */
+/* ===============================
+   WORKOUT SESSION TRACKING
+================================ */
 function logSet() {
   const now = new Date();
 
@@ -134,45 +151,61 @@ function updateDuration() {
   const diff =
     state.workoutEndedAt - state.workoutStartedAt;
 
-  const min = Math.floor(diff / 60000);
-  const sec = Math.floor((diff % 60000) / 1000);
+  const minutes = Math.floor(diff / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
 
   document.getElementById("duration").innerText =
-    `${min} min ${sec} sec`;
+    `${minutes} min ${seconds} sec`;
 }
 
-/* ---------- MOCK LLM RECOMMENDATIONS ---------- */
+/* ===============================
+   MOCK LLM RECOMMENDATIONS
+================================ */
 function generateAIRecommendations() {
   const list = document.getElementById("aiRecommendations");
   list.innerHTML = "";
 
-  const recs = [];
+  const recommendations = [];
 
   if (state.caloriesConsumed < state.baseCalories) {
-    recs.push(
-      "You are under target calories. Increase portion size in next meal."
+    recommendations.push(
+      "You are below your calorie target. Increase portion size in the next meal."
     );
   }
 
-  if (state.waterConsumed < 0.7 * state.bodyWeightKg * 35) {
-    recs.push(
+  const waterTarget = state.bodyWeightKg * 35;
+  if (state.waterConsumed < 0.7 * waterTarget) {
+    recommendations.push(
       "Hydration is low. Increase water intake to support recovery."
     );
   }
 
-  recs.push(
-    "If fatigue is high tomorrow, reduce volume by 5–10%."
+  if (state.workoutStartedAt && state.workoutEndedAt) {
+    const duration =
+      (state.workoutEndedAt - state.workoutStartedAt) / 60000;
+
+    if (duration < 30) {
+      recommendations.push(
+        "Workout duration is short. Consider increasing rest or volume."
+      );
+    }
+  }
+
+  recommendations.push(
+    "If fatigue is high tomorrow, reduce training volume by 5–10%."
   );
 
-  recs.forEach(r => {
+  recommendations.forEach(text => {
     const li = document.createElement("li");
-    li.innerText = r;
+    li.innerText = text;
     list.appendChild(li);
   });
 }
 
-/* ---------- INIT ---------- */
-renderDate();
+/* ===============================
+   INIT
+================================ */
+renderDates();
 generateWorkoutPlan();
 generateDietPlan();
 calculateWaterTarget();
