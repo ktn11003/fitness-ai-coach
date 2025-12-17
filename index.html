@@ -1,24 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Fitness AI Coach</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
-<header>Fitness AI Coach</header>
-
-<nav>
-  <span class="active">Today</span>
-  <span>Meals</span>
-  <span>Analysis</span>
-  <span>Dashboard</span>
-</nav>
-
 <main>
-  <h1>Welcome</h1>
-  <p>This app will dynamically plan workouts, meals, and analysis.</p>
-</main>
 
-</body>
-</html>
+  <h2 id="todayDate"></h2>
+  <p><strong>Target Date:</strong> 31 March 2026</p>
+
+  <hr>
+
+  <h3>Workout Plan</h3>
+  <ul id="workoutPlan"></ul>
+
+  <button onclick="logSet()">Log Set</button>
+
+  <p><strong>Workout Start:</strong> <span id="startTime">-</span></p>
+  <p><strong>Workout End:</strong> <span id="endTime">-</span></p>
+  <p><strong>Duration:</strong> <span id="duration">-</span></p>
+
+  <hr>
+
+  <h3>Diet Plan (Calories)</h3>
+  <p><strong>Daily Target:</strong> <span id="calorieTarget"></span> kcal</p>
+
+  <ul id="dietPlan"></ul>
+
+  <input type="number" id="calorieInput" placeholder="Calories consumed">
+  <button onclick="logCalories()">Log Calories</button>
+
+  <p><strong>Status:</strong> <span id="calorieStatus">-</span></p>
+
+  <hr>
+
+  <h3>Water Intake</h3>
+  <p><strong>Daily Target:</strong> <span id="waterTarget"></span> ml</p>
+  <p><strong>Consumed:</strong> <span id="waterConsumed">0</span> ml</p>
+
+  <button onclick="logWater()">Log 250 ml</button>
+
+  <hr>
+
+  <h3>AI Recommendations</h3>
+  <ul id="aiRecommendations"></ul>
+
+</main>
