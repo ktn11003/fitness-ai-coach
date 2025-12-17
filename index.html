@@ -1,37 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fitness AI Coach</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<header>Fitness AI Coach</header>
+
+<nav>
+  <span class="active">Today</span>
+</nav>
+
 <main>
 
-  <h2>
-    <span id="todayDate"></span>
-  </h2>
-
+  <!-- DATE SECTION -->
+  <h2 id="todayDate"></h2>
   <p>
     <strong>Target Date:</strong>
     <span id="targetDate"></span>
   </p>
 
   <hr>
-  
-  <h3>Diet Plan (Calories)</h3>
-  <p><strong>Daily Target:</strong> <span id="calorieTarget"></span> kcal</p>
 
-  <ul id="dietPlan"></ul>
+  <!-- WORKOUT -->
+  <h3>Workout Plan</h3>
+  <ul id="workoutPlan"></ul>
 
-  <input type="number" id="calorieInput" placeholder="Calories consumed">
-  <button onclick="logCalories()">Log Calories</button>
+  <button onclick="logSet()">Log Set</button>
 
-  <p><strong>Status:</strong> <span id="calorieStatus">-</span></p>
+  <p><strong>Workout Start:</strong> <span id="startTime">-</span></p>
+  <p><strong>Workout End:</strong> <span id="endTime">-</span></p>
+  <p><strong>Duration:</strong> <span id="duration">-</span></p>
 
   <hr>
 
+  <!-- DIET -->
+  <h3>Diet Plan</h3>
+  <p><strong>Daily Calorie Target:</strong> <span id="calorieTarget"></span> kcal</p>
+
+  <ul id="dietPlan"></ul>
+
+  <input type="number" id="calorieInput" placeholder="Enter calories consumed">
+  <button onclick="logCalories()">Log Calories</button>
+
+  <p><strong>Calorie Status:</strong> <span id="calorieStatus">-</span></p>
+
+  <hr>
+
+  <!-- WATER -->
   <h3>Water Intake</h3>
-  <p><strong>Daily Target:</strong> <span id="waterTarget"></span> ml</p>
+  <p><strong>Daily Water Target:</strong> <span id="waterTarget"></span> ml</p>
   <p><strong>Consumed:</strong> <span id="waterConsumed">0</span> ml</p>
 
   <button onclick="logWater()">Log 250 ml</button>
 
   <hr>
 
+  <!-- AI -->
   <h3>AI Recommendations</h3>
   <ul id="aiRecommendations"></ul>
 
 </main>
+
+<script src="app.js"></script>
+</body>
+</html>
