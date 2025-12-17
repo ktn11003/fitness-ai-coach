@@ -1,68 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Fitness AI Coach</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fitness AI Coach</title>
+<link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
-<header>Fitness AI Coach</header>
+<header class="header">
+  <div class="header-content">
+    <h1 id="todayDate">Loading…</h1>
+    <p class="target-date">Target: <span id="targetDate"></span></p>
+  </div>
+</header>
 
-<nav>
-  <span class="active">Today</span>
-</nav>
+<main class="container">
 
-<main>
+  <!-- WORKOUT PLAN -->
+  <section class="card workout-card">
+    <h2>Today's Workout</h2>
+    <p class="workout-type" id="workoutType">Loading…</p>
 
-  <!-- DATE SECTION -->
-  <h2 id="todayDate"></h2>
-  <p>
-    <strong>Target Date:</strong>
-    <span id="targetDate"></span>
-  </p>
+    <form id="workoutForm" class="workout-form">
+      <!-- Sets will be injected here -->
+    </form>
 
-  <hr>
+    <div class="workout-info">
+      <p><strong>Start:</strong> <span id="startTime">–</span></p>
+      <p><strong>End:</strong> <span id="endTime">–</span></p>
+      <p><strong>Duration:</strong> <span id="duration">–</span></p>
+      <p><strong>Average Rest:</strong> <span id="avgRest">–</span></p>
+    </div>
 
-  <!-- WORKOUT -->
-  <h3>Workout Plan</h3>
-  <ul id="workoutPlan"></ul>
+    <button class="btn-primary" onclick="submitWorkout()">Submit Workout</button>
+  </section>
 
-  <button onclick="logSet()">Log Set</button>
-
-  <p><strong>Workout Start:</strong> <span id="startTime">-</span></p>
-  <p><strong>Workout End:</strong> <span id="endTime">-</span></p>
-  <p><strong>Duration:</strong> <span id="duration">-</span></p>
-
-  <hr>
-
-  <!-- DIET -->
-  <h3>Diet Plan</h3>
-  <p><strong>Daily Calorie Target:</strong> <span id="calorieTarget"></span> kcal</p>
-
-  <ul id="dietPlan"></ul>
-
-  <input type="number" id="calorieInput" placeholder="Enter calories consumed">
-  <button onclick="logCalories()">Log Calories</button>
-
-  <p><strong>Calorie Status:</strong> <span id="calorieStatus">-</span></p>
-
-  <hr>
-
-  <!-- WATER -->
-  <h3>Water Intake</h3>
-  <p><strong>Daily Water Target:</strong> <span id="waterTarget"></span> ml</p>
-  <p><strong>Consumed:</strong> <span id="waterConsumed">0</span> ml</p>
-
-  <button onclick="logWater()">Log 250 ml</button>
-
-  <hr>
-
-  <!-- AI -->
-  <h3>AI Recommendations</h3>
-  <ul id="aiRecommendations"></ul>
+  <!-- AI FEEDBACK -->
+  <section class="card ai-card">
+    <h2>AI Notes</h2>
+    <ul id="aiFeedback" class="ai-list"></ul>
+  </section>
 
 </main>
 
