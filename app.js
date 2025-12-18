@@ -166,4 +166,52 @@ function logSleep(type) {
 
   pulse();
 }
+/* ======================
+   MEAL TIMING (IST)
+====================== */
+
+const mealWindows = {
+  breakfast: "8:00 – 9:30",
+  lunch: "13:00 – 14:30",
+  dinner: "20:00 – 21:30"
+};
+
+function renderMealTimes() {
+  document.getElementById("bfTime").innerText = mealWindows.breakfast;
+  document.getElementById("lnTime").innerText = mealWindows.lunch;
+  document.getElementById("dnTime").innerText = mealWindows.dinner;
+}
+
+/* ======================
+   NUTRITION STATE
+====================== */
+
+let meals = {
+  breakfast: null,
+  lunch: null,
+  dinner: null
+};
+
+function logMeal(meal, kcal) {
+  if (!kcal || kcal <= 0) return;
+
+  const now = new Date();
+
+  meals[meal] = {
+    kcal: Number(kcal),
+    time: now
+  };
+
+  const total =
+    (meals.breakfast?.kcal || 0) +
+    (meals.lunch?.kcal || 0) +
+    (meals.dinner?.kcal || 0);
+
+  document.getElementById("nutritionStatus").innerText =
+    `Consumed: ${total} kcal · Last log: ${now.toLocaleTimeString("en-IN", {
+      timeZone: "Asia/Kolkata"
+    })}`;
+
+  pulse();
+}
 
