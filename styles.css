@@ -1,3 +1,11 @@
+:root {
+  --bg: #f7f8fa;
+  --text: #111827;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --accent: #2563eb;
+}
+
 * {
   box-sizing: border-box;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -5,103 +13,83 @@
 
 body {
   margin: 0;
-  background: #f5f7fb;
-  color: #111827;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* APP LAYOUT */
+/* PROGRESS BAR */
+#progressContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  pointer-events: none;
+  z-index: 999;
+}
+
+#progressBar {
+  height: 3px;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.4s ease, opacity 0.4s ease;
+  opacity: 0;
+}
+
+/* APP */
 .app {
-  display: flex;
-  min-height: 100vh;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 24px;
 }
 
-/* SIDEBAR */
-.sidebar {
-  width: 220px;
-  background: #0f172a;
-  color: #e5e7eb;
-  padding: 24px 16px;
+.app-header h1 {
+  margin-bottom: 4px;
 }
 
-.logo {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 32px;
-}
-
-.sidebar nav a {
-  display: block;
-  padding: 10px 12px;
-  border-radius: 8px;
-  color: #cbd5f5;
-  text-decoration: none;
-  margin-bottom: 6px;
-}
-
-.sidebar nav a.active,
-.sidebar nav a:hover {
-  background: #1e293b;
-  color: #fff;
-}
-
-/* MAIN */
-.main {
-  flex: 1;
-  padding: 24px;
-  max-width: 1200px;
-}
-
-/* CARDS */
-.card, .header-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-}
-
-.header-card h1 {
-  margin: 0 0 4px;
-}
-
-.muted {
-  color: #6b7280;
+.context {
+  color: var(--muted);
   font-size: 14px;
 }
 
-.stat {
-  font-size: 18px;
+.section {
+  margin-top: 40px;
+}
+
+.section h2 {
+  font-size: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.row input {
+  width: 120px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
 }
 
 .meta {
-  margin-top: 16px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--muted);
   display: flex;
   gap: 20px;
-  font-size: 14px;
 }
 
-/* GRID */
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-/* WORKOUT */
-.exercise-grid {
-  margin-top: 16px;
-  display: grid;
-  gap: 12px;
-}
-
-.exercise-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 14px;
-  background: #f9fafb;
-}
-
-/* AI */
-.ai-card ul {
-  padding-left: 20px;
+button {
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
 }
