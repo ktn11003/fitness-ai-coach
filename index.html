@@ -1,50 +1,69 @@
-<!-- FORCE DEPLOY: WHOOP UI VERSION -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Fitness AI Coach</title>
-<link rel="stylesheet" href="styles.css">
-</head>
-<body>
+<main class="dashboard">
 
-<header class="header">
-  <div class="header-content">
-    <h1 id="todayDate">Loading…</h1>
-    <p class="target-date">Target: <span id="targetDate"></span></p>
-  </div>
-</header>
-
-<main class="container">
-
-  <!-- WORKOUT PLAN -->
-  <section class="card workout-card">
-    <h2>Today's Workout</h2>
-    <p class="workout-type" id="workoutType">Loading…</p>
-
-    <form id="workoutForm" class="workout-form">
-      <!-- Sets will be injected here -->
-    </form>
-
-    <div class="workout-info">
-      <p><strong>Start:</strong> <span id="startTime">–</span></p>
-      <p><strong>End:</strong> <span id="endTime">–</span></p>
-      <p><strong>Duration:</strong> <span id="duration">–</span></p>
-      <p><strong>Average Rest:</strong> <span id="avgRest">–</span></p>
+  <!-- CONTEXT -->
+  <section class="card context-card">
+    <div>
+      <h2 id="todayDate"></h2>
+      <p class="muted">Target date: <span id="targetDate"></span></p>
     </div>
-
-    <button class="btn-primary" onclick="submitWorkout()">Submit Workout</button>
   </section>
 
-  <!-- AI FEEDBACK -->
-  <section class="card ai-card">
-    <h2>AI Notes</h2>
-    <ul id="aiFeedback" class="ai-list"></ul>
+  <!-- WORKOUT -->
+  <section class="card">
+    <h3>Workout — Today</h3>
+
+    <div class="card-grid" id="workoutCards">
+      <!-- Exercise cards injected here -->
+    </div>
+
+    <div class="workout-meta">
+      <span>Start: <strong id="startTime">–</strong></span>
+      <span>End: <strong id="endTime">–</strong></span>
+      <span>Duration: <strong id="duration">–</strong></span>
+      <span>Avg Rest: <strong id="avgRest">–</strong></span>
+    </div>
+  </section>
+
+  <!-- DIET -->
+  <section class="card">
+    <h3>Diet — Today</h3>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <h4>Breakfast</h4>
+        <p class="muted">Oats + honey</p>
+        <p>Planned: <strong>520 kcal</strong></p>
+        <input placeholder="Actual kcal">
+      </div>
+
+      <div class="mini-card">
+        <h4>Lunch</h4>
+        <p class="muted">Rice, dal, veggies</p>
+        <p>Planned: <strong>980 kcal</strong></p>
+        <input placeholder="Actual kcal">
+      </div>
+
+      <div class="mini-card">
+        <h4>Dinner</h4>
+        <p class="muted">Roti, sabzi, curd</p>
+        <p>Planned: <strong>900 kcal</strong></p>
+        <input placeholder="Actual kcal">
+      </div>
+    </div>
+  </section>
+
+  <!-- WATER -->
+  <section class="card">
+    <h3>Hydration</h3>
+    <p>Target: <strong id="waterTarget"></strong> ml</p>
+    <p>Consumed: <strong id="waterConsumed">0</strong> ml</p>
+    <button class="btn" onclick="logWater()">Log 250 ml</button>
+  </section>
+
+  <!-- AI -->
+  <section class="card">
+    <h3>AI Recommendations</h3>
+    <ul id="aiRecommendations"></ul>
   </section>
 
 </main>
-
-<script src="app.js"></script>
-</body>
-</html>
