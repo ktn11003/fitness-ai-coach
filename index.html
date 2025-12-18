@@ -11,27 +11,26 @@
 <div id="progressContainer"><div id="progressBar"></div></div>
 
 <header class="top">
-  <div class="date-block">
-    <div id="todayDate"></div>
-    <div class="muted">
+  <div class="header-block">
+    <div class="title" id="todayDate"></div>
+    <div class="meta">
       Target: <span id="targetDate"></span> · <span id="dayCount"></span>
     </div>
   </div>
 
-  <!-- WEIGHT -->
-  <div class="weight-inline">
+  <!-- Weight -->
+  <div class="inline-row">
     <span id="weightDisplay">Weight: –</span>
-    <button class="mini" onclick="logWeight()">Log</button>
-    <span class="muted" id="weightMeta"></span>
+    <button class="btn-secondary" onclick="logWeight()">Log</button>
+    <span class="meta" id="weightMeta"></span>
   </div>
 
-  <!-- SLEEP -->
-  <div class="sleep-inline">
+  <!-- Sleep -->
+  <div class="inline-row">
     <span id="wakeDisplay">Wake: –</span>
-    <button class="mini" onclick="logWake()">Log</button>
-
+    <button class="btn-secondary" onclick="logWake()">Log</button>
     <span id="sleepDisplay">Sleep: –</span>
-    <button class="mini" onclick="logSleep()">Doze off</button>
+    <button class="btn-secondary" onclick="logSleep()">Doze off</button>
   </div>
 </header>
 
@@ -41,7 +40,7 @@
   <section class="card">
     <h2>Workout · Push</h2>
     <div id="workoutArea"></div>
-    <div class="meta">
+    <div class="meta-row">
       <span>Start <strong id="startTime">–</strong></span>
       <span>End <strong id="endTime">–</strong></span>
       <span>Duration <strong id="duration">–</strong></span>
@@ -51,14 +50,40 @@
   <!-- NUTRITION -->
   <section class="card">
     <h2>Nutrition</h2>
-    <div class="row"><span>Target</span><strong>3400–3600 kcal</strong></div>
+    <div class="row">
+      <span>Target</span>
+      <strong>3400–3600 kcal</strong>
+    </div>
 
-    <div class="meal-row"><span>Breakfast</span><span class="badge">8–9</span><span class="muted">550</span><input onchange="logMeal('bf',this.value)" /></div>
-    <div class="meal-row"><span>Mid-morning</span><span class="badge">11</span><span class="muted">400</span><input onchange="logMeal('mm',this.value)" /></div>
-    <div class="meal-row"><span>Lunch</span><span class="badge">13:30</span><span class="muted">700</span><input onchange="logMeal('l',this.value)" /></div>
-    <div class="meal-row"><span>Pre-WO</span><span class="badge">16:30</span><span class="muted">350</span><input onchange="logMeal('pre',this.value)" /></div>
-    <div class="meal-row"><span>Dinner</span><span class="badge">19:30</span><span class="muted">750</span><input onchange="logMeal('d',this.value)" /></div>
-    <div class="meal-row"><span>Pre-sleep</span><span class="badge">22:30</span><span class="muted">350</span><input onchange="logMeal('ps',this.value)" /></div>
+    <div class="row-grid">
+      <span>Breakfast</span><span class="badge">8–9</span><span class="meta">550</span>
+      <input onchange="logMeal('bf',this.value)" />
+    </div>
+
+    <div class="row-grid">
+      <span>Mid-morning</span><span class="badge">11</span><span class="meta">400</span>
+      <input onchange="logMeal('mm',this.value)" />
+    </div>
+
+    <div class="row-grid">
+      <span>Lunch</span><span class="badge">13:30</span><span class="meta">700</span>
+      <input onchange="logMeal('l',this.value)" />
+    </div>
+
+    <div class="row-grid">
+      <span>Pre-workout</span><span class="badge">16:30</span><span class="meta">350</span>
+      <input onchange="logMeal('pre',this.value)" />
+    </div>
+
+    <div class="row-grid">
+      <span>Dinner</span><span class="badge">19:30</span><span class="meta">750</span>
+      <input onchange="logMeal('d',this.value)" />
+    </div>
+
+    <div class="row-grid">
+      <span>Pre-sleep</span><span class="badge">22:30</span><span class="meta">350</span>
+      <input onchange="logMeal('ps',this.value)" />
+    </div>
 
     <div class="meta" id="nutritionStatus">–</div>
   </section>
