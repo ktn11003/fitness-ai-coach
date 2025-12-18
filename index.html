@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fitness OS</title>
+  <title>Daily Tracker</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -13,61 +13,53 @@
   <div id="progressBar"></div>
 </div>
 
-<div class="app">
+<header class="top">
+  <div id="todayDate"></div>
+  <div class="muted">
+    Target: <span id="targetDate"></span> · <span id="dayCount"></span>
+  </div>
+</header>
 
-  <header class="app-header">
-    <h1>Fitness OS</h1>
-    <div class="context">
-      <span id="todayDate"></span>
-      <span>·</span>
-      <span>Target: <strong id="targetDate"></strong></span>
-      <span>·</span>
-      <span id="dayCount"></span>
-    </div>
-  </header>
+<main class="grid">
 
   <!-- WORKOUT -->
-  <section class="section">
-    <h2>Workout</h2>
+  <section class="card">
+    <h2>Workout · Push</h2>
     <div id="workoutArea"></div>
     <div class="meta">
-      <span>Start: <strong id="startTime">–</strong></span>
-      <span>End: <strong id="endTime">–</strong></span>
-      <span>Duration: <strong id="duration">–</strong></span>
+      <span id="startTime">–</span>
+      <span id="endTime">–</span>
+      <span id="duration">–</span>
     </div>
   </section>
 
   <!-- NUTRITION -->
-  <section class="section">
+  <section class="card">
     <h2>Nutrition</h2>
     <div class="row">
-      <span>Breakfast · Oats + honey</span>
-      <input placeholder="Actual kcal" />
+      <span>Target</span>
+      <strong>3300 kcal</strong>
     </div>
-    <div class="row">
-      <span>Lunch · Rice, dal, vegetables</span>
-      <input placeholder="Actual kcal" />
-    </div>
-    <div class="row">
-      <span>Dinner · Roti, sabzi, curd</span>
-      <input placeholder="Actual kcal" />
-    </div>
+    <input class="full" placeholder="Log calories eaten" />
   </section>
 
   <!-- HYDRATION -->
-  <section class="section">
+  <section class="card">
     <h2>Hydration</h2>
-    <p>Target: <strong>2.8 L</strong></p>
+    <div class="row">
+      <span>Target</span>
+      <strong>2.8 L</strong>
+    </div>
     <button onclick="logWater()">Log 250 ml</button>
   </section>
 
   <!-- AI -->
-  <section class="section">
-    <h2>AI Insights</h2>
+  <section class="card">
+    <h2>Coach</h2>
     <ul id="aiInsights"></ul>
   </section>
 
-</div>
+</main>
 
 <script src="app.js"></script>
 </body>
