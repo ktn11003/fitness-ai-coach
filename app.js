@@ -110,3 +110,60 @@ function renderAI() {
 }
 
 init();
+/* ======================
+   NUTRITION
+====================== */
+
+let meals = {
+  breakfast: null,
+  lunch: null,
+  dinner: null
+};
+
+function logMeal(meal, kcal) {
+  if (!kcal || kcal <= 0) return;
+
+  meals[meal] = {
+    kcal: Number(kcal),
+    time: new Date()
+  };
+
+  const total =
+    (meals.breakfast?.kcal || 0) +
+    (meals.lunch?.kcal || 0) +
+    (meals.dinner?.kcal || 0);
+
+  const status = document.getElementById("nutritionStatus");
+  status.innerText =
+    `Consumed: ${total} kcal · Logged at ${new Date().toLocaleTimeString("en-IN")}`;
+
+  pulse();
+}
+
+/* ======================
+   SLEEP
+====================== */
+
+let sleep = {
+  off: null,
+  wake: null
+};
+
+function logSleep(type) {
+  const now = new Date();
+
+  if (type === "off") {
+    sleep.off = now;
+    document.getElementById("sleepOff").innerText =
+      `Switch-off: ${now.toLocaleTimeString("en-IN")}`;
+  }
+
+  if (type === "wake") {
+    sleep.wake = now;
+    document.getElementById("sleepWake").innerText =
+      `Wake-up: ${now.toLocaleTimeString("en-IN")}`;
+  }
+
+  pulse();
+}
+
