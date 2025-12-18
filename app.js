@@ -1,375 +1,308 @@
-/************************************************************
- * FITNESS OS — CANONICAL CORE + FIXED PLANS
- * QA-SAFE · STATE-SAFE · LLM-SAFE
- * Timezone: IST (Asia/Kolkata)
- ************************************************************/
+/* =========================================================
+   FITNESS TRACKER — QA HARDENED CORE
+   ========================================================= */
 
-/* ================= CONSTANTS ================= */
+/* -------------------------
+   CONSTANTS
+-------------------------- */
 
-const TZ = "Asia/Kolkata";
-const BASE_SLEEP_HOURS = 8;
-const STORAGE_PREFIX = "day:";
+const STORAGE_KEY = "fitness_day_v1";
+const TARGET_DATE = "2026-03-31";
 const START_DATE = "2025-12-18";
 
-/* ================= FIXED PLANS ================= */
+/* -------------------------
+   UTILITIES
+-------------------------- */
+
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function nowIST() {
+  return new Date().toISOString();
+}
+
+function daysSinceStart() {
+  const a = new Date(START_DATE);
+  const b = new Date(todayISO());
+  return Math.floor((b - a) / 86400000);
+}
+
+/* -------------------------
+   FIXED DAY-0 PLANS (LOCKED)
+-------------------------- */
+
+const WORKOUT_SPLIT = ["push", "pull", "legs", "push", "pull", "legs", "rest"];
 
 const WORKOUT_PLANS = {
   push: [
-    { exercise: "Bench Press", sets: 3, reps: 15 },
-    { exercise: "Overhead Press", sets: 3, reps: 15 },
-    { exercise: "Triceps Pushdown", sets: 3, reps: 15 }
+    { name: "Bench Press", sets: 3, reps: 15 },
+    { name: "Overhead Press", sets: 3, reps: 15 },
+    { name: "Triceps Pushdown", sets: 3, reps: 15 }
   ],
   pull: [
-    { exercise: "Lat Pulldown", sets: 3, reps: 15 },
-    { exercise: "Seated Row", sets: 3, reps: 15 },
-    { exercise: "Biceps Curl", sets: 3, reps: 15 }
+    { name: "Lat Pulldown", sets: 3, reps: 15 },
+    { name: "Seated Row", sets: 3, reps: 15 },
+    { name: "Biceps Curl", sets: 3, reps: 15 }
   ],
   legs: [
-    { exercise: "Squats", sets: 3, reps: 15 },
-    { exercise: "Leg Press", sets: 3, reps: 15 },
-    { exercise: "Hamstring Curl", sets: 3, reps: 15 }
+    { name: "Squat", sets: 3, reps: 15 },
+    { name: "Leg Press", sets: 3, reps: 15 },
+    { name: "Ham Curl", sets: 3, reps: 15 }
   ],
-  recovery: []
+  rest: []
 };
 
 const MEAL_PLAN = [
   { id: "breakfast", label: "Breakfast", time: "08:00", kcal: 550 },
-  { id: "mid_morning", label: "Mid-Morning", time: "11:00", kcal: 400 },
-  { id: "lunch", label: "Lunch", time: "14:00", kcal: 700 },
-  { id: "pre_workout", label: "Pre-Workout", time: "17:00", kcal: 350 },
-  { id: "dinner", label: "Dinner", time: "20:00", kcal: 750 },
-  { id: "pre_sleep", label: "Pre-Sleep", time: "22:30", kcal: 350 }
+  { id: "mid", label: "Mid-Morning", time: "11:00", kcal: 400 },
+  { id: "lunch", label: "Lunch", time: "13:30", kcal: 700 },
+  { id: "prewo", label: "Pre-Workout", time: "16:30", kcal: 350 },
+  { id: "dinner", label: "Dinner", time: "19:30", kcal: 750 },
+  { id: "presleep", label: "Pre-Sleep", time: "22:30", kcal: 350 }
 ];
 
-const HYDRATION_PLAN = [
-  { id: "morning", label: "Morning", ml: 500 },
-  { id: "late_morning", label: "Late Morning", ml: 750 },
-  { id: "afternoon", label: "Afternoon", ml: 750 },
-  { id: "workout", label: "Workout Window", ml: 750 },
-  { id: "evening", label: "Evening", ml: 450 }
+const HYDRATION_WINDOWS = [
+  { id: "morning", label: "Morning", ml: 750 },
+  { id: "afternoon", label: "Afternoon", ml: 1250 },
+  { id: "evening", label: "Evening", ml: 1200 }
 ];
 
-/* ================= UTIL ================= */
+/* -------------------------
+   STATE FACTORY
+-------------------------- */
 
-function todayKey(offset = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return d.toISOString().slice(0, 10);
-}
-
-function nowISO() {
-  return new Date().toISOString();
-}
-
-function dayIndex(dateStr) {
-  return Math.floor((new Date(dateStr) - new Date(START_DATE)) / 86400000);
-}
-
-function getWorkoutTypeForDay(dateStr) {
-  return ["push", "pull", "legs", "push", "pull", "legs", "recovery"][
-    dayIndex(dateStr) % 7
-  ];
-}
-
-function pulse() {
-  const bar = document.getElementById("progressBar");
-  if (!bar) return;
-  bar.style.opacity = 1;
-  bar.style.width = "90%";
-  setTimeout(() => {
-    bar.style.width = "100%";
-    setTimeout(() => {
-      bar.style.opacity = 0;
-      bar.style.width = "0%";
-    }, 300);
-  }, 200);
-}
-
-/* ================= DAY MODEL ================= */
-
-function createEmptyDay(date) {
+function createEmptyDay() {
   return {
-    meta: {
-      date,
-      timezone: TZ,
-      state: "IDLE",
-      created_at: nowISO(),
-      last_updated_at: nowISO()
+    date: todayISO(),
+    dayIndex: daysSinceStart(),
+    weight: null,            // null = not logged (never 0)
+    sleep: null,             // ISO timestamp
+    wake: null,              // ISO timestamp
+    workout: {
+      start: null,
+      end: null
     },
-
-    plan: {},
-
-    actuals: {
-      sleep: {
-        sleep_logged_at: null,
-        wake_logged_at: null,
-        sleep_duration_hours: 0,
-        sleep_debt_hours: 0
-      },
-      weight: {
-        value_kg: null,
-        logged_at: null
-      },
-      hydration: {
-        windows: {},
-        total_ml: 0
-      },
-      nutrition: {
-        meals: {},
-        total_calories: 0
-      },
-      workout: {
-        sets: [],
-        started_at: null,
-        ended_at: null,
-        duration_minutes: 0
-      }
-    }
+    meals: {},               // keyed by meal id
+    hydration: {},           // keyed by window id
   };
 }
 
-/* ================= STORAGE ================= */
+/* -------------------------
+   LOAD / SAVE (MIGRATION SAFE)
+-------------------------- */
 
-function loadDay(date) {
-  const raw = localStorage.getItem(STORAGE_PREFIX + date);
-  if (raw) return JSON.parse(raw);
+function loadDay() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  let day = raw ? JSON.parse(raw) : createEmptyDay();
 
-  const day = createEmptyDay(date);
-  injectFixedPlan(day);
+  // Hard guarantee required fields
+  day.meals ||= {};
+  day.hydration ||= {};
+  day.workout ||= { start: null, end: null };
+
   saveDay(day);
   return day;
 }
 
 function saveDay(day) {
-  day.meta.last_updated_at = nowISO();
-  localStorage.setItem(STORAGE_PREFIX + day.meta.date, JSON.stringify(day));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(day));
 }
 
-/* ================= PLAN INJECTION ================= */
+let DAY = loadDay();
 
-function injectFixedPlan(day) {
-  const type = getWorkoutTypeForDay(day.meta.date);
+/* -------------------------
+   RENDER HELPERS
+-------------------------- */
 
-  day.plan.workout = {
-    type,
-    exercises: WORKOUT_PLANS[type]
-  };
-
-  day.plan.nutrition = {
-    planned_calories: MEAL_PLAN.reduce((a, m) => a + m.kcal, 0),
-    meals: MEAL_PLAN
-  };
-
-  day.plan.hydration = {
-    planned_total_ml: HYDRATION_PLAN.reduce((a, w) => a + w.ml, 0),
-    windows: HYDRATION_PLAN
-  };
-
-  HYDRATION_PLAN.forEach(w => {
-    day.actuals.hydration.windows[w.id] = {
-      actual_ml: 0,
-      logged_at: null,
-      status: "missed"
-    };
-  });
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = value;
 }
 
-/* ================= STATE GUARDS ================= */
+/* -------------------------
+   HEADER
+-------------------------- */
 
-function canLogSleep(day) {
-  return day.meta.state === "PLANNED";
-}
-function canLogWake(day) {
-  return day.meta.state === "SLEEPING";
-}
-function canLogWeight(day) {
-  return day.actuals.weight.value_kg === null;
-}
-function canLogHydration(day, id) {
-  return day.actuals.hydration.windows[id].status !== "completed";
+function renderHeader() {
+  setText("todayDate", new Date().toDateString());
+  setText("targetDate", `Target: ${TARGET_DATE}`);
 }
 
-/* ================= INIT ================= */
+/* -------------------------
+   WORKOUT
+-------------------------- */
 
-let DAY = loadDay(todayKey());
-
-function init() {
-  renderAll();
-}
-init();
-
-/* ================= SLEEP ================= */
-
-function savePlannedSleep(val) {
-  DAY.plan.sleep = DAY.plan.sleep || {};
-  DAY.plan.sleep.planned_sleep_time = val || null;
-  DAY.meta.state = "PLANNED";
-  saveDay(DAY);
-  pulse();
-}
-
-function savePlannedWake(val) {
-  DAY.plan.sleep = DAY.plan.sleep || {};
-  DAY.plan.sleep.planned_wake_time = val || null;
-  DAY.meta.state = "PLANNED";
-  saveDay(DAY);
-  pulse();
-}
-
-function logSleep() {
-  if (!canLogSleep(DAY)) return;
-  DAY.actuals.sleep.sleep_logged_at = nowISO();
-  DAY.meta.state = "SLEEPING";
-  saveDay(DAY);
-  renderAll();
-  pulse();
-}
-
-function logWake() {
-  if (!canLogWake(DAY)) return;
-  DAY.actuals.sleep.wake_logged_at = nowISO();
-
-  const start = new Date(DAY.actuals.sleep.sleep_logged_at);
-  const end = new Date(DAY.actuals.sleep.wake_logged_at);
-  const hrs = Math.max(0, (end - start) / 36e5);
-
-  DAY.actuals.sleep.sleep_duration_hours = +hrs.toFixed(2);
-  DAY.actuals.sleep.sleep_debt_hours = Math.max(0, BASE_SLEEP_HOURS - hrs);
-  DAY.meta.state = "AWAKE";
-
-  saveDay(DAY);
-  renderAll();
-  pulse();
-}
-
-/* ================= WEIGHT ================= */
-
-function logWeight(val) {
-  if (!canLogWeight(DAY)) return;
-
-  const re = /^(?:[3-9][0-9]|1[0-9]{2})(?:\.[0-9])?$/;
-  if (!re.test(val)) return;
-
-  DAY.actuals.weight.value_kg = Number(val);
-  DAY.actuals.weight.logged_at = nowISO();
-  saveDay(DAY);
-  renderAll();
-  pulse();
-}
-
-/* ================= HYDRATION ================= */
-
-function logHydration(id) {
-  if (!canLogHydration(DAY, id)) return;
-
-  const plan = DAY.plan.hydration.windows.find(w => w.id === id);
-  DAY.actuals.hydration.windows[id] = {
-    actual_ml: plan.ml,
-    logged_at: nowISO(),
-    status: "completed"
-  };
-
-  DAY.actuals.hydration.total_ml = Object.values(
-    DAY.actuals.hydration.windows
-  ).reduce((a, w) => a + w.actual_ml, 0);
-
-  saveDay(DAY);
-  renderAll();
-  pulse();
-}
-
-/* ================= RENDER ================= */
-
-function renderAll() {
-  renderWorkout();
-  renderMeals();
-  renderHydration();
-  renderSleep();
-  renderWeight();
+function currentWorkoutPlan() {
+  const split = WORKOUT_SPLIT[DAY.dayIndex % 7];
+  return WORKOUT_PLANS[split];
 }
 
 function renderWorkout() {
   const el = document.getElementById("workoutArea");
   if (!el) return;
   el.innerHTML = "";
-  DAY.plan.workout.exercises.forEach(ex => {
-    const d = document.createElement("div");
-    d.className = "row";
-    d.innerHTML = `<span>${ex.exercise}</span><span>${ex.sets} × ${ex.reps}</span>`;
-    el.appendChild(d);
+
+  const plan = currentWorkoutPlan();
+
+  if (!plan.length) {
+    el.innerHTML = "<div class='row'>Recovery Day</div>";
+    return;
+  }
+
+  plan.forEach(ex => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<span>${ex.name}</span><span>${ex.sets} × ${ex.reps}</span>`;
+    el.appendChild(row);
   });
+
+  setText("workoutStart", `Start: ${DAY.workout.start ?? "—"}`);
+  setText("workoutEnd", `End: ${DAY.workout.end ?? "—"}`);
+  setText("workoutDuration", "Duration: —");
 }
 
-function renderMeals() {
+/* -------------------------
+   NUTRITION
+-------------------------- */
+
+function renderNutrition() {
   const el = document.getElementById("nutritionRows");
   if (!el) return;
   el.innerHTML = "";
-  DAY.plan.nutrition.meals.forEach(m => {
-    const d = document.createElement("div");
-    d.className = "row";
-    d.innerHTML = `<span>${m.label} (${m.time})</span><span>${m.kcal} kcal</span>`;
-    el.appendChild(d);
+
+  setText("nutritionTarget", "Target: 3400–3600 kcal");
+
+  MEAL_PLAN.forEach(m => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<span>${m.label} (${m.time})</span><span>${m.kcal} kcal</span>`;
+    el.appendChild(row);
   });
 }
+
+/* -------------------------
+   HYDRATION
+-------------------------- */
 
 function renderHydration() {
   const el = document.getElementById("waterArea");
   if (!el) return;
   el.innerHTML = "";
-  DAY.plan.hydration.windows.forEach(w => {
-    const a = DAY.actuals.hydration.windows[w.id];
-    const btn =
-      a.status === "completed"
-        ? "✓"
-        : `<button onclick="logHydration('${w.id}')">Done</button>`;
-    const d = document.createElement("div");
-    d.className = "row";
-    d.innerHTML = `<span>${w.label}</span><span>${w.ml} ml</span>${btn}`;
-    el.appendChild(d);
+
+  setText("hydrationTarget", "Target: 3.2 L");
+
+  HYDRATION_WINDOWS.forEach(w => {
+    const done = DAY.hydration[w.id];
+    const row = document.createElement("div");
+    row.className = "row";
+
+    if (done) {
+      row.innerHTML = `<span>${w.label} ${w.ml} ml</span><span>✓</span>`;
+    } else {
+      row.innerHTML = `
+        <span>${w.label} ${w.ml} ml</span>
+        <button onclick="logHydration('${w.id}')">Done</button>
+      `;
+    }
+
+    el.appendChild(row);
   });
 }
 
-function renderSleep() {
-  const s = DAY.actuals.sleep;
-  if (document.getElementById("sleepDisplay"))
-    document.getElementById("sleepDisplay").innerText =
-      s.sleep_logged_at ? "Sleep logged" : "Sleep: –";
-  if (document.getElementById("wakeDisplay"))
-    document.getElementById("wakeDisplay").innerText =
-      s.wake_logged_at ? "Wake logged" : "Wake: –";
+function logHydration(id) {
+  if (DAY.hydration[id]) return;
+  DAY.hydration[id] = {
+    ml: HYDRATION_WINDOWS.find(w => w.id === id).ml,
+    loggedAt: nowIST()
+  };
+  saveDay(DAY);
+  renderHydration();
 }
+
+/* -------------------------
+   SLEEP (STATE MACHINE)
+-------------------------- */
+
+function renderSleep() {
+  setText("sleepDisplay", DAY.sleep ? DAY.sleep : "—");
+  setText("wakeDisplay", DAY.wake ? DAY.wake : "—");
+}
+
+function logSleep() {
+  if (DAY.sleep) return;
+  DAY.sleep = nowIST();
+  saveDay(DAY);
+  renderSleep();
+}
+
+function logWake() {
+  if (!DAY.sleep || DAY.wake) return;
+  DAY.wake = nowIST();
+  saveDay(DAY);
+  renderSleep();
+}
+
+/* -------------------------
+   WEIGHT
+-------------------------- */
 
 function renderWeight() {
-  if (!document.getElementById("weightDisplay")) return;
-  document.getElementById("weightDisplay").innerText =
-    DAY.actuals.weight.value_kg === null
-      ? "Weight: –"
-      : `Weight: ${DAY.actuals.weight.value_kg} kg`;
+  setText("weightDisplay", DAY.weight !== null ? `${DAY.weight} kg` : "—");
 }
 
-/* ================= EXPORT ================= */
+function logWeight(val) {
+  const n = Number(val);
+  if (!n || n <= 0 || DAY.weight !== null) return;
+  DAY.weight = n;
+  saveDay(DAY);
+  renderWeight();
+}
+
+/* -------------------------
+   EXPORT (GROUND TRUTH)
+-------------------------- */
 
 function exportCSV() {
-  const rows = [["date", "weight_kg", "sleep_hours", "hydration_ml"]];
-  Object.keys(localStorage)
-    .filter(k => k.startsWith(STORAGE_PREFIX))
-    .sort()
-    .forEach(k => {
-      const d = JSON.parse(localStorage.getItem(k));
-      rows.push([
-        d.meta.date,
-        d.actuals.weight.value_kg ?? "",
-        d.actuals.sleep.sleep_duration_hours,
-        d.actuals.hydration.total_ml
-      ]);
-    });
+  const rows = [
+    ["date", DAY.date],
+    ["weight", DAY.weight ?? ""],
+    ["sleep", DAY.sleep ?? ""],
+    ["wake", DAY.wake ?? ""]
+  ];
+
+  HYDRATION_WINDOWS.forEach(w => {
+    rows.push([
+      `hydration_${w.id}`,
+      DAY.hydration[w.id]?.ml ?? 0
+    ]);
+  });
 
   const csv = rows.map(r => r.join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = "fitness_ground_truth.csv";
+  a.href = URL.createObjectURL(blob);
+  a.download = "fitness_day.csv";
   a.click();
-  URL.revokeObjectURL(url);
 }
+
+/* -------------------------
+   INIT
+-------------------------- */
+
+function init() {
+  renderHeader();
+  renderWorkout();
+  renderNutrition();
+  renderHydration();
+  renderSleep();
+  renderWeight();
+
+  document.getElementById("sleepBtn").onclick = logSleep;
+  document.getElementById("wakeBtn").onclick = logWake;
+  document.getElementById("weightLogBtn").onclick = () =>
+    logWeight(document.getElementById("weightInput").value);
+  document.getElementById("exportBtn").onclick = exportCSV;
+}
+
+init();
