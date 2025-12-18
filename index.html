@@ -1,68 +1,95 @@
-<h1 style="color:red">DEPLOY TEST</h1>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fitness Tracker</title>
+
+  <!-- SINGLE SOURCE OF TRUTH FOR STYLES -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-  <!-- Progress bar -->
-  <div id="progressBar" class="progress-bar"></div>
+  <!-- APP CONTAINER -->
+  <main class="app">
 
-  <div class="container">
-
+    <!-- HEADER -->
     <header class="header">
-      <div id="todayDate" class="date"></div>
-      <div class="target">Target: 31 March 2026</div>
+      <div class="header-left">
+        <h1 id="todayDate">—</h1>
+        <p id="targetDate">Target: —</p>
+      </div>
     </header>
 
-    <section class="card">
-      <h2>Workout — Today</h2>
-      <div id="workoutArea"></div>
+    <!-- GRID -->
+    <section class="grid">
+
+      <!-- WORKOUT -->
+      <section class="card" id="workoutCard">
+        <h2>Workout — Today</h2>
+        <div id="workoutArea" class="content"></div>
+        <div class="meta">
+          <span id="workoutStart">Start: —</span>
+          <span id="workoutEnd">End: —</span>
+          <span id="workoutDuration">Duration: —</span>
+        </div>
+      </section>
+
+      <!-- NUTRITION -->
+      <section class="card" id="nutritionCard">
+        <h2>Nutrition</h2>
+        <div id="nutritionTarget" class="subtle">Target: — kcal</div>
+        <div id="nutritionRows" class="content"></div>
+      </section>
+
+      <!-- HYDRATION -->
+      <section class="card" id="hydrationCard">
+        <h2>Hydration</h2>
+        <div id="hydrationTarget" class="subtle">Target: — L</div>
+        <div id="waterArea" class="content"></div>
+      </section>
+
+      <!-- SLEEP -->
+      <section class="card" id="sleepCard">
+        <h2>Sleep</h2>
+
+        <div class="row">
+          <button id="sleepBtn">Going to Sleep</button>
+          <span id="sleepDisplay">—</span>
+        </div>
+
+        <div class="row">
+          <button id="wakeBtn">I’m Awake</button>
+          <span id="wakeDisplay">—</span>
+        </div>
+      </section>
+
+      <!-- WEIGHT -->
+      <section class="card" id="weightCard">
+        <h2>Weight</h2>
+        <div class="row">
+          <input
+            id="weightInput"
+            type="number"
+            inputmode="decimal"
+            placeholder="kg"
+          />
+          <button id="weightLogBtn">Log</button>
+          <span id="weightDisplay">—</span>
+        </div>
+      </section>
+
     </section>
 
-    <section class="card">
-      <h2>Nutrition</h2>
-      <div id="nutritionRows"></div>
-    </section>
+    <!-- FOOTER ACTIONS -->
+    <footer class="footer">
+      <button id="exportBtn">Download CSV</button>
+    </footer>
 
-    <section class="card">
-      <h2>Hydration</h2>
-      <div id="waterArea"></div>
-    </section>
+  </main>
 
-    <section class="card">
-      <h2>Sleep</h2>
-      <div class="row">
-        <button onclick="logSleep()">Going to Sleep</button>
-        <span id="sleepDisplay">Sleep: –</span>
-      </div>
-      <div class="row">
-        <button onclick="logWake()">I’m Awake</button>
-        <span id="wakeDisplay">Wake: –</span>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>Weight</h2>
-      <div class="row">
-        <input id="weightInput" type="number" step="0.1" placeholder="Enter weight (kg)" />
-        <button onclick="logWeight(document.getElementById('weightInput').value)">Log</button>
-        <span id="weightDisplay">Weight: –</span>
-      </div>
-    </section>
-
-    <section class="card">
-      <button onclick="exportCSV()">Download CSV</button>
-    </section>
-
-  </div>
-
+  <!-- SINGLE SOURCE OF TRUTH FOR LOGIC -->
   <script src="app.js"></script>
 </body>
 </html>
