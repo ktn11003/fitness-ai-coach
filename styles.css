@@ -18,16 +18,15 @@ body {
   color: var(--text);
 }
 
-/* PROGRESS BAR */
+/* Progress bar */
 #progressContainer {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   height: 3px;
-  z-index: 1000;
+  z-index: 999;
 }
-
 #progressBar {
   height: 3px;
   width: 0%;
@@ -36,49 +35,68 @@ body {
   transition: width 0.4s ease, opacity 0.4s ease;
 }
 
-/* HEADER */
+/* Header */
 .top {
   padding: 16px 20px 8px;
 }
-
 .top div:first-child {
   font-size: 18px;
   font-weight: 600;
 }
-
 .muted {
   color: var(--muted);
   font-size: 13px;
 }
 
-/* GRID */
+/* Grid */
 .grid {
   display: grid;
   gap: 16px;
-  padding: 16px 20px 24px;
+  padding: 16px 20px;
 }
-
-/* Desktop */
 @media (min-width: 900px) {
   .grid {
     grid-template-columns: 1fr 1fr;
   }
 }
 
-/* CARD */
+/* Card */
 .card {
   background: var(--card);
   border-radius: 16px;
   padding: 18px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
-
 .card h2 {
   font-size: 15px;
   margin-bottom: 12px;
 }
 
-/* ROWS */
+/* Workout */
+.exercise {
+  margin-bottom: 12px;
+}
+.exercise-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.set-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.set-row span {
+  font-size: 13px;
+}
+.set-row input {
+  width: 80px;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+
+/* Rows */
 .row {
   display: flex;
   justify-content: space-between;
@@ -93,7 +111,17 @@ input.full {
   border: 1px solid var(--line);
 }
 
-/* META */
+/* Meals */
+.meal {
+  margin-top: 12px;
+}
+.meal-head {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 6px;
+}
+
+/* Meta */
 .meta {
   display: flex;
   justify-content: space-between;
@@ -102,7 +130,7 @@ input.full {
   margin-top: 10px;
 }
 
-/* BUTTON */
+/* Buttons */
 button {
   width: 100%;
   padding: 12px;
@@ -112,12 +140,8 @@ button {
   color: white;
   font-size: 14px;
 }
-.meal {
-  margin-top: 12px;
-}
 
-.meal-head {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 6px;
+/* Sleep */
+.sleep {
+  padding: 16px 20px 24px;
 }
