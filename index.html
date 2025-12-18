@@ -1,69 +1,80 @@
-<main class="dashboard">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitness OS</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
 
-  <!-- CONTEXT -->
-  <section class="card context-card">
-    <div>
-      <h2 id="todayDate"></h2>
-      <p class="muted">Target date: <span id="targetDate"></span></p>
-    </div>
-  </section>
+<div class="app">
 
-  <!-- WORKOUT -->
-  <section class="card">
-    <h3>Workout — Today</h3>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">Fitness OS</div>
+    <nav>
+      <a class="active">Today</a>
+      <a>Workout</a>
+      <a>Nutrition</a>
+      <a>Hydration</a>
+      <a>Sleep</a>
+      <a>Analysis</a>
+    </nav>
+  </aside>
 
-    <div class="card-grid" id="workoutCards">
-      <!-- Exercise cards injected here -->
-    </div>
+  <!-- MAIN -->
+  <main class="main">
 
-    <div class="workout-meta">
-      <span>Start: <strong id="startTime">–</strong></span>
-      <span>End: <strong id="endTime">–</strong></span>
-      <span>Duration: <strong id="duration">–</strong></span>
-      <span>Avg Rest: <strong id="avgRest">–</strong></span>
-    </div>
-  </section>
-
-  <!-- DIET -->
-  <section class="card">
-    <h3>Diet — Today</h3>
-
-    <div class="card-grid">
-      <div class="mini-card">
-        <h4>Breakfast</h4>
-        <p class="muted">Oats + honey</p>
-        <p>Planned: <strong>520 kcal</strong></p>
-        <input placeholder="Actual kcal">
+    <!-- HEADER -->
+    <section class="header-card">
+      <div>
+        <h1 id="todayDate">Loading…</h1>
+        <p class="muted">
+          Target: <span id="targetDate"></span> ·
+          <span id="dayCount"></span>
+        </p>
       </div>
+    </section>
 
-      <div class="mini-card">
-        <h4>Lunch</h4>
-        <p class="muted">Rice, dal, veggies</p>
-        <p>Planned: <strong>980 kcal</strong></p>
-        <input placeholder="Actual kcal">
+    <!-- WORKOUT -->
+    <section class="card">
+      <h2>Workout — Today</h2>
+      <p class="muted">Push Day · Focus on controlled volume</p>
+
+      <div class="exercise-grid" id="workoutCards"></div>
+
+      <div class="meta">
+        <span>Start: <strong id="startTime">–</strong></span>
+        <span>End: <strong id="endTime">–</strong></span>
+        <span>Duration: <strong id="duration">–</strong></span>
       </div>
+    </section>
 
-      <div class="mini-card">
-        <h4>Dinner</h4>
-        <p class="muted">Roti, sabzi, curd</p>
-        <p>Planned: <strong>900 kcal</strong></p>
-        <input placeholder="Actual kcal">
-      </div>
-    </div>
-  </section>
+    <!-- NUTRITION + WATER -->
+    <section class="grid-2">
+      <section class="card">
+        <h2>Nutrition</h2>
+        <p class="stat">Target: <strong>3300 kcal</strong></p>
+        <p class="muted">Balanced surplus · Protein priority</p>
+      </section>
 
-  <!-- WATER -->
-  <section class="card">
-    <h3>Hydration</h3>
-    <p>Target: <strong id="waterTarget"></strong> ml</p>
-    <p>Consumed: <strong id="waterConsumed">0</strong> ml</p>
-    <button class="btn" onclick="logWater()">Log 250 ml</button>
-  </section>
+      <section class="card">
+        <h2>Hydration</h2>
+        <p class="stat">Target: <strong>2.8 L</strong></p>
+        <p class="muted">Spread evenly through the day</p>
+      </section>
+    </section>
 
-  <!-- AI -->
-  <section class="card">
-    <h3>AI Recommendations</h3>
-    <ul id="aiRecommendations"></ul>
-  </section>
+    <!-- AI -->
+    <section class="card ai-card">
+      <h2>AI Coach — Today</h2>
+      <ul id="aiNotes"></ul>
+    </section>
 
-</main>
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
