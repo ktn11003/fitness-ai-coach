@@ -33,7 +33,7 @@
     </div>
   </section>
 
- <!-- NUTRITION -->
+<!-- NUTRITION -->
 <section class="card">
   <h2>Nutrition</h2>
 
@@ -42,23 +42,36 @@
     <strong>3300 kcal</strong>
   </div>
 
-  <div class="row">
-    <span>Breakfast · Oats + honey</span>
-    <input class="full" placeholder="kcal eaten" onchange="logMeal('breakfast', this.value)" />
+  <div class="meal">
+    <div class="meal-head">
+      <span><strong>Breakfast</strong> · <span id="bfTime"></span></span>
+      <span class="muted">Oats + honey · 520 kcal</span>
+    </div>
+    <input class="full" placeholder="kcal eaten"
+      onchange="logMeal('breakfast', this.value)" />
   </div>
 
-  <div class="row">
-    <span>Lunch · Rice, dal, vegetables</span>
-    <input class="full" placeholder="kcal eaten" onchange="logMeal('lunch', this.value)" />
+  <div class="meal">
+    <div class="meal-head">
+      <span><strong>Lunch</strong> · <span id="lnTime"></span></span>
+      <span class="muted">Rice, dal, vegetables · 980 kcal</span>
+    </div>
+    <input class="full" placeholder="kcal eaten"
+      onchange="logMeal('lunch', this.value)" />
   </div>
 
-  <div class="row">
-    <span>Dinner · Roti, sabzi, curd</span>
-    <input class="full" placeholder="kcal eaten" onchange="logMeal('dinner', this.value)" />
+  <div class="meal">
+    <div class="meal-head">
+      <span><strong>Dinner</strong> · <span id="dnTime"></span></span>
+      <span class="muted">Roti, sabzi, curd · 900 kcal</span>
+    </div>
+    <input class="full" placeholder="kcal eaten"
+      onchange="logMeal('dinner', this.value)" />
   </div>
 
   <div class="meta" id="nutritionStatus">–</div>
 </section>
+
 
   <!-- SLEEP -->
 <section class="section">
