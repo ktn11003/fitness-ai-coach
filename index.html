@@ -3,105 +3,140 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily Tracker</title>
+  <title>Fitness Tracker</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-<div id="progressContainer"><div id="progressBar"></div></div>
+<!-- Progress bar -->
+<div id="progressContainer">
+  <div id="progressBar"></div>
+</div>
 
-<header class="top">
-  <div class="header-block">
-    <div class="title" id="todayDate"></div>
-    <div class="meta">
-      Target: <span id="targetDate"></span> · <span id="dayCount"></span>
-    </div>
-  </div>
+<!-- Tabs -->
+<nav class="tabs">
+  <button class="tab active" onclick="switchTab('today')">Today</button>
+  <button class="tab" onclick="switchTab('analysis')">Analysis</button>
+  <button class="tab" onclick="switchTab('history')">History</button>
+  <button class="tab" onclick="switchTab('tomorrow')">Tomorrow’s Plan</button>
+</nav>
 
-  <!-- Weight -->
-  <div class="inline-row">
-    <span id="weightDisplay">Weight: –</span>
-    <button class="btn-secondary" onclick="logWeight()">Log</button>
-    <span class="meta" id="weightMeta"></span>
-  </div>
+<!-- ================= TODAY TAB ================= -->
+<section id="today" class="tab-page active">
 
-  <!-- Sleep -->
-  <div class="inline-row">
-    <span id="wakeDisplay">Wake: –</span>
-    <button class="btn-secondary" onclick="logWake()">Log</button>
-    <span id="sleepDisplay">Sleep: –</span>
-    <button class="btn-secondary" onclick="logSleep()">Doze off</button>
-  </div>
-</header>
-
-<main class="grid">
-
-  <!-- WORKOUT -->
-  <section class="card">
-    <h2>Workout · Push</h2>
-    <div id="workoutArea"></div>
-    <div class="meta-row">
-      <span>Start <strong id="startTime">–</strong></span>
-      <span>End <strong id="endTime">–</strong></span>
-      <span>Duration <strong id="duration">–</strong></span>
-    </div>
-  </section>
-
-  <!-- NUTRITION -->
-  <section class="card">
-    <h2>Nutrition</h2>
-    <div class="row">
-      <span>Target</span>
-      <strong>3400–3600 kcal</strong>
+  <!-- Header -->
+  <header class="top">
+    <div class="header-block">
+      <div class="title" id="todayDate">–</div>
+      <div class="meta">
+        Target: <span id="targetDate">–</span> · <span id="dayCount">–</span>
+      </div>
     </div>
 
-    <div class="row-grid">
-      <span>Breakfast</span><span class="badge">8–9</span><span class="meta">550</span>
-      <input onchange="logMeal('bf',this.value)" />
+    <!-- Weight -->
+    <div class="inline-row">
+      <span id="weightDisplay">Weight: –</span>
+      <button class="btn-secondary" onclick="logWeight()">Log</button>
+      <span class="meta" id="weightMeta"></span>
     </div>
 
-    <div class="row-grid">
-      <span>Mid-morning</span><span class="badge">11</span><span class="meta">400</span>
-      <input onchange="logMeal('mm',this.value)" />
+    <!-- Sleep -->
+    <div class="inline-row">
+      <span id="wakeDisplay">Wake: –</span>
+      <button class="btn-secondary" onclick="logWake()">Log</button>
+
+      <span id="sleepDisplay">Sleep: –</span>
+      <button class="btn-secondary" onclick="logSleep()">Doze off</button>
     </div>
+  </header>
 
-    <div class="row-grid">
-      <span>Lunch</span><span class="badge">13:30</span><span class="meta">700</span>
-      <input onchange="logMeal('l',this.value)" />
-    </div>
+  <!-- Main content -->
+  <main class="grid">
 
-    <div class="row-grid">
-      <span>Pre-workout</span><span class="badge">16:30</span><span class="meta">350</span>
-      <input onchange="logMeal('pre',this.value)" />
-    </div>
+    <!-- Workout -->
+    <section class="card">
+      <h2>Workout · Push</h2>
+      <div id="workoutArea"></div>
 
-    <div class="row-grid">
-      <span>Dinner</span><span class="badge">19:30</span><span class="meta">750</span>
-      <input onchange="logMeal('d',this.value)" />
-    </div>
+      <div class="meta-row">
+        <span>Start <strong id="startTime">–</strong></span>
+        <span>End <strong id="endTime">–</strong></span>
+        <span>Duration <strong id="duration">–</strong></span>
+      </div>
+    </section>
 
-    <div class="row-grid">
-      <span>Pre-sleep</span><span class="badge">22:30</span><span class="meta">350</span>
-      <input onchange="logMeal('ps',this.value)" />
-    </div>
+    <!-- Nutrition -->
+    <section class="card">
+      <h2>Nutrition</h2>
 
-    <div class="meta" id="nutritionStatus">–</div>
-  </section>
+      <div class="row">
+        <span>Target</span>
+        <strong>3400–3600 kcal</strong>
+      </div>
 
-  <!-- HYDRATION -->
-  <section class="card">
-    <h2>Hydration · 3.2 L</h2>
-    <div id="waterArea"></div>
-    <div class="meta" id="waterStatus">–</div>
-  </section>
+      <div class="row-grid">
+        <span>Breakfast</span><span class="badge">8–9</span><span class="meta">550</span>
+        <input onchange="logMeal('breakfast', this.value)" />
+      </div>
 
-  <!-- AI -->
-  <section class="card">
-    <h2>Coach</h2>
-    <ul id="aiInsights"></ul>
-  </section>
+      <div class="row-grid">
+        <span>Mid-morning</span><span class="badge">11</span><span class="meta">400</span>
+        <input onchange="logMeal('mid', this.value)" />
+      </div>
 
-</main>
+      <div class="row-grid">
+        <span>Lunch</span><span class="badge">13:30</span><span class="meta">700</span>
+        <input onchange="logMeal('lunch', this.value)" />
+      </div>
+
+      <div class="row-grid">
+        <span>Pre-workout</span><span class="badge">16:30</span><span class="meta">350</span>
+        <input onchange="logMeal('pre', this.value)" />
+      </div>
+
+      <div class="row-grid">
+        <span>Dinner</span><span class="badge">19:30</span><span class="meta">750</span>
+        <input onchange="logMeal('dinner', this.value)" />
+      </div>
+
+      <div class="row-grid">
+        <span>Pre-sleep</span><span class="badge">22:30</span><span class="meta">350</span>
+        <input onchange="logMeal('presleep', this.value)" />
+      </div>
+
+      <div class="meta" id="nutritionStatus">–</div>
+    </section>
+
+    <!-- Hydration -->
+    <section class="card">
+      <h2>Hydration · 3.2 L</h2>
+      <div id="waterArea"></div>
+      <div class="meta" id="waterStatus">–</div>
+    </section>
+
+    <!-- Today notes -->
+    <section class="card">
+      <h2>Today’s Notes</h2>
+      <ul id="aiInsights"></ul>
+    </section>
+
+  </main>
+</section>
+
+<!-- ================= ANALYSIS TAB ================= -->
+<section id="analysis" class="tab-page">
+  <div class="placeholder">Analysis tab – coming next</div>
+</section>
+
+<!-- ================= HISTORY TAB ================= -->
+<section id="history" class="tab-page">
+  <div class="placeholder">History & CSV export – coming next</div>
+</section>
+
+<!-- ================= TOMORROW TAB ================= -->
+<section id="tomorrow" class="tab-page">
+  <div class="placeholder">Tomorrow’s plan – AI generated</div>
+</section>
 
 <script src="app.js"></script>
 </body>
