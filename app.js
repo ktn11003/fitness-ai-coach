@@ -1,3 +1,49 @@
+/* ================= FIXED DAY 0–7 PLANS ================= */
+
+const WORKOUT_PLANS = {
+  push: [
+    { exercise: "Bench Press", sets: 3, reps: 15 },
+    { exercise: "Overhead Press", sets: 3, reps: 15 },
+    { exercise: "Triceps Pushdown", sets: 3, reps: 15 }
+  ],
+  pull: [
+    { exercise: "Lat Pulldown", sets: 3, reps: 15 },
+    { exercise: "Seated Row", sets: 3, reps: 15 },
+    { exercise: "Biceps Curl", sets: 3, reps: 15 }
+  ],
+  legs: [
+    { exercise: "Squats", sets: 3, reps: 15 },
+    { exercise: "Leg Press", sets: 3, reps: 15 },
+    { exercise: "Hamstring Curl", sets: 3, reps: 15 }
+  ],
+  recovery: []
+};
+
+const MEAL_PLAN = [
+  { id: "breakfast", label: "Breakfast", time: "08:00", kcal: 550 },
+  { id: "mid_morning", label: "Mid-Morning", time: "11:00", kcal: 400 },
+  { id: "lunch", label: "Lunch", time: "14:00", kcal: 700 },
+  { id: "pre_workout", label: "Pre-Workout", time: "17:00", kcal: 350 },
+  { id: "dinner", label: "Dinner", time: "20:00", kcal: 750 },
+  { id: "pre_sleep", label: "Pre-Sleep", time: "22:30", kcal: 350 }
+];
+
+const HYDRATION_PLAN = [
+  { id: "morning", label: "Morning", ml: 500 },
+  { id: "late_morning", label: "Late Morning", ml: 750 },
+  { id: "afternoon", label: "Afternoon", ml: 750 },
+  { id: "workout", label: "Workout Window", ml: 750 },
+  { id: "evening", label: "Evening", ml: 450 }
+];
+
+function getWorkoutTypeForDay(dateStr) {
+  const dayIndex =
+    Math.floor(
+      (new Date(dateStr) - new Date("2025-12-18")) / 86400000
+    ) % 7;
+
+  return ["push", "pull", "legs", "push", "pull", "legs", "recovery"][dayIndex];
+}
 /************************************************************
  * FITNESS OS — CANONICAL CORE (QA-SAFE, LLM-SAFE)
  * Timezone: IST (Asia/Kolkata)
