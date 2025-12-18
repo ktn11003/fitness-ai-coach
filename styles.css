@@ -1,147 +1,108 @@
 :root {
-  --bg: #f6f7fb;
-  --card: #ffffff;
-  --text: #111827;
-  --muted: #6b7280;
-  --accent: #2563eb;
-  --line: #e5e7eb;
+  --bg:#f6f7fb; --card:#fff; --text:#111827;
+  --muted:#6b7280; --accent:#2563eb; --line:#e5e7eb;
 }
 
-* {
-  box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-}
+* { box-sizing:border-box; font-family:system-ui,-apple-system,sans-serif; }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-}
+body { margin:0; background:var(--bg); color:var(--text); }
 
-/* Progress bar */
-#progressContainer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  z-index: 999;
-}
-#progressBar {
-  height: 3px;
-  width: 0%;
-  background: var(--accent);
-  opacity: 0;
-  transition: width 0.4s ease, opacity 0.4s ease;
-}
+/* progress bar */
+#progressContainer { position:fixed; top:0; left:0; right:0; height:3px; }
+#progressBar { height:3px; width:0%; background:var(--accent); opacity:0; transition:.4s; }
 
-/* Header */
+/* header */
 .top {
-  padding: 16px 20px 8px;
-}
-.top div:first-child {
-  font-size: 18px;
-  font-weight: 600;
-}
-.muted {
-  color: var(--muted);
-  font-size: 13px;
+  padding:14px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
 }
 
-/* Grid */
+.date-block div:first-child { font-size:18px; font-weight:600; }
+
+.weight-inline, .sleep-inline {
+  display:flex; gap:8px; align-items:center; font-size:13px;
+}
+
+.mini {
+  padding:4px 8px;
+  font-size:12px;
+  border-radius:6px;
+  border:1px solid var(--line);
+  background:#fff;
+}
+
+/* grid */
 .grid {
-  display: grid;
-  gap: 16px;
-  padding: 16px 20px;
+  display:grid; gap:16px; padding:16px 20px;
 }
-@media (min-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr 1fr;
-  }
+@media (min-width:900px) {
+  .grid { grid-template-columns:1fr 1fr; }
 }
 
-/* Card */
+/* card */
 .card {
-  background: var(--card);
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-}
-.card h2 {
-  font-size: 15px;
-  margin-bottom: 12px;
+  background:var(--card);
+  border-radius:16px;
+  padding:18px;
+  box-shadow:0 8px 20px rgba(0,0,0,.06);
 }
 
-/* Workout */
-.exercise {
-  margin-bottom: 12px;
-}
-.exercise-title {
-  font-weight: 600;
-  margin-bottom: 6px;
-}
+.exercise { margin-bottom:14px; }
+.exercise-title { font-weight:600; margin-bottom:6px; }
+
 .set-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-.set-row span {
-  font-size: 13px;
+  display:flex; gap:8px; margin-bottom:6px;
 }
 .set-row input {
-  width: 80px;
-  padding: 6px;
-  border-radius: 6px;
-  border: 1px solid var(--line);
+  width:60px; padding:6px;
+  border-radius:6px; border:1px solid var(--line);
 }
 
-/* Rows */
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+.row { display:flex; justify-content:space-between; margin-bottom:8px; }
+
+.meal-row {
+  display:grid;
+  grid-template-columns: 1fr auto auto 70px;
+  gap:8px;
+  align-items:center;
+  margin-bottom:8px;
 }
 
-input.full {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+.meal-row input {
+  padding:6px;
+  border-radius:6px;
+  border:1px solid var(--line);
 }
 
-/* Meals */
-.meal {
-  margin-top: 12px;
-}
-.meal-head {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 6px;
+.badge {
+  font-size:11px;
+  padding:2px 6px;
+  border-radius:999px;
+  background:#eef2ff;
+  color:#3730a3;
 }
 
-/* Meta */
 .meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 10px;
+  font-size:12px; color:var(--muted);
+  display:flex; gap:12px; margin-top:8px;
 }
 
-/* Buttons */
 button {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  background: var(--accent);
-  color: white;
-  font-size: 14px;
+  width:100%; padding:12px;
+  border:none; border-radius:10px;
+  background:var(--accent); color:white;
 }
-
-/* Sleep */
-.sleep {
-  padding: 16px 20px 24px;
+.water-row {
+  display:grid;
+  grid-template-columns: 1fr auto auto;
+  gap:8px;
+  align-items:center;
+  margin-bottom:8px;
+}
+.water-row button {
+  padding:4px 8px;
+  font-size:12px;
+  border-radius:6px;
 }
