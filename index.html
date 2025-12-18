@@ -8,15 +8,22 @@
 </head>
 <body>
 
-<!-- Progress bar -->
-<div id="progressContainer">
-  <div id="progressBar"></div>
-</div>
+<div id="progressContainer"><div id="progressBar"></div></div>
 
 <header class="top">
-  <div id="todayDate"></div>
-  <div class="muted">
-    Target: <span id="targetDate"></span> · <span id="dayCount"></span>
+  <div class="date-line">
+    <div id="todayDate"></div>
+    <div class="muted">
+      Target: <span id="targetDate"></span> · <span id="dayCount"></span>
+    </div>
+  </div>
+
+  <div class="sleep-inline">
+    <span id="wakeDisplay">Wake: –</span>
+    <button class="mini" onclick="logWake()">Log</button>
+
+    <span id="sleepDisplay">Sleep: –</span>
+    <button class="mini" onclick="logSleep()">Doze off</button>
   </div>
 </header>
 
@@ -26,11 +33,10 @@
   <section class="card">
     <h2>Workout · Push</h2>
     <div id="workoutArea"></div>
-
     <div class="meta">
-      <span>Start: <strong id="startTime">–</strong></span>
-      <span>End: <strong id="endTime">–</strong></span>
-      <span>Duration: <strong id="duration">–</strong></span>
+      <span>Start <strong id="startTime">–</strong></span>
+      <span>End <strong id="endTime">–</strong></span>
+      <span>Duration <strong id="duration">–</strong></span>
     </div>
   </section>
 
@@ -39,35 +45,29 @@
     <h2>Nutrition</h2>
 
     <div class="row">
-      <span>Daily Target</span>
+      <span>Target</span>
       <strong>3300 kcal</strong>
     </div>
 
-    <div class="meal">
-      <div class="meal-head">
-        <strong>Breakfast</strong>
-        <span class="muted">8:00–9:30 · Oats + honey (520 kcal)</span>
-      </div>
-      <input class="full" placeholder="kcal eaten"
-        onchange="logMeal('breakfast', this.value)" />
+    <div class="meal-row">
+      <span>Breakfast</span>
+      <span class="badge">8:00–9:30</span>
+      <span class="muted">520</span>
+      <input placeholder="kcal" onchange="logMeal('breakfast', this.value)" />
     </div>
 
-    <div class="meal">
-      <div class="meal-head">
-        <strong>Lunch</strong>
-        <span class="muted">13:00–14:30 · Rice, dal, veg (980 kcal)</span>
-      </div>
-      <input class="full" placeholder="kcal eaten"
-        onchange="logMeal('lunch', this.value)" />
+    <div class="meal-row">
+      <span>Lunch</span>
+      <span class="badge">13:00–14:30</span>
+      <span class="muted">980</span>
+      <input placeholder="kcal" onchange="logMeal('lunch', this.value)" />
     </div>
 
-    <div class="meal">
-      <div class="meal-head">
-        <strong>Dinner</strong>
-        <span class="muted">20:00–21:30 · Roti, sabzi, curd (900 kcal)</span>
-      </div>
-      <input class="full" placeholder="kcal eaten"
-        onchange="logMeal('dinner', this.value)" />
+    <div class="meal-row">
+      <span>Dinner</span>
+      <span class="badge">20:00–21:30</span>
+      <span class="muted">900</span>
+      <input placeholder="kcal" onchange="logMeal('dinner', this.value)" />
     </div>
 
     <div class="meta" id="nutritionStatus">–</div>
@@ -90,22 +90,6 @@
   </section>
 
 </main>
-
-<!-- SLEEP -->
-<section class="sleep">
-  <div class="row">
-    <span>Switch-off time</span>
-    <button onclick="logSleep('off')">Log</button>
-  </div>
-  <div class="row">
-    <span>Wake-up time</span>
-    <button onclick="logSleep('wake')">Log</button>
-  </div>
-  <div class="meta">
-    <span id="sleepOff">–</span>
-    <span id="sleepWake">–</span>
-  </div>
-</section>
 
 <script src="app.js"></script>
 </body>
