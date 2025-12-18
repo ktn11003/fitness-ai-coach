@@ -1,4 +1,17 @@
-/* ================= FIXED DAY 0–7 PLANS ================= */
+/************************************************************
+ * FITNESS OS — CANONICAL CORE + FIXED PLANS
+ * QA-SAFE · STATE-SAFE · LLM-SAFE
+ * Timezone: IST (Asia/Kolkata)
+ ************************************************************/
+
+/* ================= CONSTANTS ================= */
+
+const TZ = "Asia/Kolkata";
+const BASE_SLEEP_HOURS = 8;
+const STORAGE_PREFIX = "day:";
+const START_DATE = "2025-12-18";
+
+/* ================= FIXED PLANS ================= */
 
 const WORKOUT_PLANS = {
   push: [
@@ -36,26 +49,7 @@ const HYDRATION_PLAN = [
   { id: "evening", label: "Evening", ml: 450 }
 ];
 
-function getWorkoutTypeForDay(dateStr) {
-  const dayIndex =
-    Math.floor(
-      (new Date(dateStr) - new Date("2025-12-18")) / 86400000
-    ) % 7;
-
-  return ["push", "pull", "legs", "push", "pull", "legs", "recovery"][dayIndex];
-}
-/************************************************************
- * FITNESS OS — CANONICAL CORE (QA-SAFE, LLM-SAFE)
- * Timezone: IST (Asia/Kolkata)
- ************************************************************/
-
-/* ================= CONSTANTS ================= */
-
-const TZ = "Asia/Kolkata";
-const BASE_SLEEP_HOURS = 8;
-const STORAGE_PREFIX = "day:";
-
-/* ================= UTILITIES ================= */
+/* ================= UTIL ================= */
 
 function todayKey(offset = 0) {
   const d = new Date();
@@ -65,6 +59,16 @@ function todayKey(offset = 0) {
 
 function nowISO() {
   return new Date().toISOString();
+}
+
+function dayIndex(dateStr) {
+  return Math.floor((new Date(dateStr) - new Date(START_DATE)) / 86400000);
+}
+
+function getWorkoutTypeForDay(dateStr) {
+  return ["push", "pull", "legs", "push", "pull", "legs", "recovery"][
+    dayIndex(dateStr) % 7
+  ];
 }
 
 function pulse() {
@@ -81,7 +85,7 @@ function pulse() {
   }, 200);
 }
 
-/* ================= DAY RECORD ================= */
+/* ================= DAY MODEL ================= */
 
 function createEmptyDay(date) {
   return {
@@ -93,12 +97,7 @@ function createEmptyDay(date) {
       last_updated_at: nowISO()
     },
 
-    plan: {
-      sleep: {
-        planned_sleep_time: null,
-        planned_wake_time: null
-      }
-    },
+    plan: {},
 
     actuals: {
       sleep: {
@@ -107,40 +106,24 @@ function createEmptyDay(date) {
         sleep_duration_hours: 0,
         sleep_debt_hours: 0
       },
-
       weight: {
         value_kg: null,
         logged_at: null
       },
-
       hydration: {
-        windows: {
-          morning: { actual_ml: 0, logged_at: null, status: "missed" },
-          late_morning: { actual_ml: 0, logged_at: null, status: "missed" },
-          afternoon: { actual_ml: 0, logged_at: null, status: "missed" },
-          workout: { actual_ml: 0, logged_at: null, status: "missed" },
-          evening: { actual_ml: 0, logged_at: null, status: "missed" }
-        },
+        windows: {},
         total_ml: 0
       },
-
       nutrition: {
         meals: {},
         total_calories: 0
       },
-
       workout: {
         sets: [],
         started_at: null,
         ended_at: null,
         duration_minutes: 0
       }
-    },
-
-    kpis: {},
-    confidence: {
-      overall: "low",
-      reasons: []
     }
   };
 }
@@ -148,11 +131,11 @@ function createEmptyDay(date) {
 /* ================= STORAGE ================= */
 
 function loadDay(date) {
-  const key = STORAGE_PREFIX + date;
-  const raw = localStorage.getItem(key);
+  const raw = localStorage.getItem(STORAGE_PREFIX + date);
   if (raw) return JSON.parse(raw);
 
   const day = createEmptyDay(date);
+  injectFixedPlan(day);
   saveDay(day);
   return day;
 }
@@ -162,22 +145,48 @@ function saveDay(day) {
   localStorage.setItem(STORAGE_PREFIX + day.meta.date, JSON.stringify(day));
 }
 
-/* ================= STATE MACHINE GUARDS ================= */
+/* ================= PLAN INJECTION ================= */
+
+function injectFixedPlan(day) {
+  const type = getWorkoutTypeForDay(day.meta.date);
+
+  day.plan.workout = {
+    type,
+    exercises: WORKOUT_PLANS[type]
+  };
+
+  day.plan.nutrition = {
+    planned_calories: MEAL_PLAN.reduce((a, m) => a + m.kcal, 0),
+    meals: MEAL_PLAN
+  };
+
+  day.plan.hydration = {
+    planned_total_ml: HYDRATION_PLAN.reduce((a, w) => a + w.ml, 0),
+    windows: HYDRATION_PLAN
+  };
+
+  HYDRATION_PLAN.forEach(w => {
+    day.actuals.hydration.windows[w.id] = {
+      actual_ml: 0,
+      logged_at: null,
+      status: "missed"
+    };
+  });
+}
+
+/* ================= STATE GUARDS ================= */
 
 function canLogSleep(day) {
   return day.meta.state === "PLANNED";
 }
-
 function canLogWake(day) {
   return day.meta.state === "SLEEPING";
 }
-
 function canLogWeight(day) {
   return day.actuals.weight.value_kg === null;
 }
-
-function canLogHydration(day, windowId) {
-  return day.actuals.hydration.windows[windowId].status !== "completed";
+function canLogHydration(day, id) {
+  return day.actuals.hydration.windows[id].status !== "completed";
 }
 
 /* ================= INIT ================= */
@@ -185,23 +194,23 @@ function canLogHydration(day, windowId) {
 let DAY = loadDay(todayKey());
 
 function init() {
-  renderSleep();
-  renderWeight();
+  renderAll();
 }
-
 init();
 
 /* ================= SLEEP ================= */
 
-function savePlannedSleep(time) {
-  DAY.plan.sleep.planned_sleep_time = time || null;
+function savePlannedSleep(val) {
+  DAY.plan.sleep = DAY.plan.sleep || {};
+  DAY.plan.sleep.planned_sleep_time = val || null;
   DAY.meta.state = "PLANNED";
   saveDay(DAY);
   pulse();
 }
 
-function savePlannedWake(time) {
-  DAY.plan.sleep.planned_wake_time = time || null;
+function savePlannedWake(val) {
+  DAY.plan.sleep = DAY.plan.sleep || {};
+  DAY.plan.sleep.planned_wake_time = val || null;
   DAY.meta.state = "PLANNED";
   saveDay(DAY);
   pulse();
@@ -209,76 +218,53 @@ function savePlannedWake(time) {
 
 function logSleep() {
   if (!canLogSleep(DAY)) return;
-
   DAY.actuals.sleep.sleep_logged_at = nowISO();
   DAY.meta.state = "SLEEPING";
   saveDay(DAY);
-  renderSleep();
+  renderAll();
   pulse();
 }
 
 function logWake() {
   if (!canLogWake(DAY)) return;
-
   DAY.actuals.sleep.wake_logged_at = nowISO();
 
   const start = new Date(DAY.actuals.sleep.sleep_logged_at);
   const end = new Date(DAY.actuals.sleep.wake_logged_at);
+  const hrs = Math.max(0, (end - start) / 36e5);
 
-  const hours = Math.max(0, (end - start) / 36e5);
-  DAY.actuals.sleep.sleep_duration_hours = Number(hours.toFixed(2));
-  DAY.actuals.sleep.sleep_debt_hours = Math.max(
-    0,
-    BASE_SLEEP_HOURS - DAY.actuals.sleep.sleep_duration_hours
-  );
-
+  DAY.actuals.sleep.sleep_duration_hours = +hrs.toFixed(2);
+  DAY.actuals.sleep.sleep_debt_hours = Math.max(0, BASE_SLEEP_HOURS - hrs);
   DAY.meta.state = "AWAKE";
-  saveDay(DAY);
-  renderSleep();
-  pulse();
-}
 
-function renderSleep() {
-  const s = DAY.actuals.sleep;
-  if (document.getElementById("sleepDisplay")) {
-    document.getElementById("sleepDisplay").innerText =
-      s.sleep_logged_at ? "Sleep logged" : "Sleep: –";
-  }
-  if (document.getElementById("wakeDisplay")) {
-    document.getElementById("wakeDisplay").innerText =
-      s.wake_logged_at ? "Wake logged" : "Wake: –";
-  }
+  saveDay(DAY);
+  renderAll();
+  pulse();
 }
 
 /* ================= WEIGHT ================= */
 
-function logWeight(value) {
+function logWeight(val) {
   if (!canLogWeight(DAY)) return;
 
-  const regex = /^(?:[3-9][0-9]|1[0-9]{2})(?:\.[0-9])?$/;
-  if (!regex.test(value)) return;
+  const re = /^(?:[3-9][0-9]|1[0-9]{2})(?:\.[0-9])?$/;
+  if (!re.test(val)) return;
 
-  DAY.actuals.weight.value_kg = Number(value);
+  DAY.actuals.weight.value_kg = Number(val);
   DAY.actuals.weight.logged_at = nowISO();
   saveDay(DAY);
-  renderWeight();
+  renderAll();
   pulse();
-}
-
-function renderWeight() {
-  const w = DAY.actuals.weight;
-  if (!document.getElementById("weightDisplay")) return;
-  document.getElementById("weightDisplay").innerText =
-    w.value_kg !== null ? `Weight: ${w.value_kg} kg` : "Weight: –";
 }
 
 /* ================= HYDRATION ================= */
 
-function logHydration(windowId, ml) {
-  if (!canLogHydration(DAY, windowId)) return;
+function logHydration(id) {
+  if (!canLogHydration(DAY, id)) return;
 
-  DAY.actuals.hydration.windows[windowId] = {
-    actual_ml: ml,
+  const plan = DAY.plan.hydration.windows.find(w => w.id === id);
+  DAY.actuals.hydration.windows[id] = {
+    actual_ml: plan.ml,
     logged_at: nowISO(),
     status: "completed"
   };
@@ -288,19 +274,88 @@ function logHydration(windowId, ml) {
   ).reduce((a, w) => a + w.actual_ml, 0);
 
   saveDay(DAY);
+  renderAll();
   pulse();
+}
+
+/* ================= RENDER ================= */
+
+function renderAll() {
+  renderWorkout();
+  renderMeals();
+  renderHydration();
+  renderSleep();
+  renderWeight();
+}
+
+function renderWorkout() {
+  const el = document.getElementById("workoutArea");
+  if (!el) return;
+  el.innerHTML = "";
+  DAY.plan.workout.exercises.forEach(ex => {
+    const d = document.createElement("div");
+    d.className = "row";
+    d.innerHTML = `<span>${ex.exercise}</span><span>${ex.sets} × ${ex.reps}</span>`;
+    el.appendChild(d);
+  });
+}
+
+function renderMeals() {
+  const el = document.getElementById("nutritionRows");
+  if (!el) return;
+  el.innerHTML = "";
+  DAY.plan.nutrition.meals.forEach(m => {
+    const d = document.createElement("div");
+    d.className = "row";
+    d.innerHTML = `<span>${m.label} (${m.time})</span><span>${m.kcal} kcal</span>`;
+    el.appendChild(d);
+  });
+}
+
+function renderHydration() {
+  const el = document.getElementById("waterArea");
+  if (!el) return;
+  el.innerHTML = "";
+  DAY.plan.hydration.windows.forEach(w => {
+    const a = DAY.actuals.hydration.windows[w.id];
+    const btn =
+      a.status === "completed"
+        ? "✓"
+        : `<button onclick="logHydration('${w.id}')">Done</button>`;
+    const d = document.createElement("div");
+    d.className = "row";
+    d.innerHTML = `<span>${w.label}</span><span>${w.ml} ml</span>${btn}`;
+    el.appendChild(d);
+  });
+}
+
+function renderSleep() {
+  const s = DAY.actuals.sleep;
+  if (document.getElementById("sleepDisplay"))
+    document.getElementById("sleepDisplay").innerText =
+      s.sleep_logged_at ? "Sleep logged" : "Sleep: –";
+  if (document.getElementById("wakeDisplay"))
+    document.getElementById("wakeDisplay").innerText =
+      s.wake_logged_at ? "Wake logged" : "Wake: –";
+}
+
+function renderWeight() {
+  if (!document.getElementById("weightDisplay")) return;
+  document.getElementById("weightDisplay").innerText =
+    DAY.actuals.weight.value_kg === null
+      ? "Weight: –"
+      : `Weight: ${DAY.actuals.weight.value_kg} kg`;
 }
 
 /* ================= EXPORT ================= */
 
 function exportCSV() {
   const rows = [["date", "weight_kg", "sleep_hours", "hydration_ml"]];
-
   Object.keys(localStorage)
     .filter(k => k.startsWith(STORAGE_PREFIX))
     .sort()
-    .forEach(key => {
-      const d = JSON.parse(localStorage.getItem(key));
+    .forEach(k => {
+      const d = JSON.parse(localStorage.getItem(k));
       rows.push([
         d.meta.date,
         d.actuals.weight.value_kg ?? "",
@@ -312,11 +367,9 @@ function exportCSV() {
   const csv = rows.map(r => r.join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement("a");
   a.href = url;
   a.download = "fitness_ground_truth.csv";
   a.click();
-
   URL.revokeObjectURL(url);
 }
