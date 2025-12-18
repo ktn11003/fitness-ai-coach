@@ -28,6 +28,7 @@ function init() {
   renderDates();
   renderWorkout();
   renderAI();
+  renderMealTimes();
 }
 
 function renderDates() {
