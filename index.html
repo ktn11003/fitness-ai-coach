@@ -11,13 +11,21 @@
 <div id="progressContainer"><div id="progressBar"></div></div>
 
 <header class="top">
-  <div class="date-line">
+  <div class="date-block">
     <div id="todayDate"></div>
     <div class="muted">
       Target: <span id="targetDate"></span> · <span id="dayCount"></span>
     </div>
   </div>
 
+  <!-- WEIGHT -->
+  <div class="weight-inline">
+    <span id="weightDisplay">Weight: –</span>
+    <button class="mini" onclick="logWeight()">Log</button>
+    <span class="muted" id="weightMeta"></span>
+  </div>
+
+  <!-- SLEEP -->
   <div class="sleep-inline">
     <span id="wakeDisplay">Wake: –</span>
     <button class="mini" onclick="logWake()">Log</button>
@@ -43,44 +51,23 @@
   <!-- NUTRITION -->
   <section class="card">
     <h2>Nutrition</h2>
+    <div class="row"><span>Target</span><strong>3400–3600 kcal</strong></div>
 
-    <div class="row">
-      <span>Target</span>
-      <strong>3300 kcal</strong>
-    </div>
-
-    <div class="meal-row">
-      <span>Breakfast</span>
-      <span class="badge">8:00–9:30</span>
-      <span class="muted">520</span>
-      <input placeholder="kcal" onchange="logMeal('breakfast', this.value)" />
-    </div>
-
-    <div class="meal-row">
-      <span>Lunch</span>
-      <span class="badge">13:00–14:30</span>
-      <span class="muted">980</span>
-      <input placeholder="kcal" onchange="logMeal('lunch', this.value)" />
-    </div>
-
-    <div class="meal-row">
-      <span>Dinner</span>
-      <span class="badge">20:00–21:30</span>
-      <span class="muted">900</span>
-      <input placeholder="kcal" onchange="logMeal('dinner', this.value)" />
-    </div>
+    <div class="meal-row"><span>Breakfast</span><span class="badge">8–9</span><span class="muted">550</span><input onchange="logMeal('bf',this.value)" /></div>
+    <div class="meal-row"><span>Mid-morning</span><span class="badge">11</span><span class="muted">400</span><input onchange="logMeal('mm',this.value)" /></div>
+    <div class="meal-row"><span>Lunch</span><span class="badge">13:30</span><span class="muted">700</span><input onchange="logMeal('l',this.value)" /></div>
+    <div class="meal-row"><span>Pre-WO</span><span class="badge">16:30</span><span class="muted">350</span><input onchange="logMeal('pre',this.value)" /></div>
+    <div class="meal-row"><span>Dinner</span><span class="badge">19:30</span><span class="muted">750</span><input onchange="logMeal('d',this.value)" /></div>
+    <div class="meal-row"><span>Pre-sleep</span><span class="badge">22:30</span><span class="muted">350</span><input onchange="logMeal('ps',this.value)" /></div>
 
     <div class="meta" id="nutritionStatus">–</div>
   </section>
 
   <!-- HYDRATION -->
   <section class="card">
-    <h2>Hydration</h2>
-    <div class="row">
-      <span>Target</span>
-      <strong>2.8 L</strong>
-    </div>
-    <button onclick="logWater()">Log 250 ml</button>
+    <h2>Hydration · 3.2 L</h2>
+    <div id="waterArea"></div>
+    <div class="meta" id="waterStatus">–</div>
   </section>
 
   <!-- AI -->
