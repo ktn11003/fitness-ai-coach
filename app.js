@@ -132,10 +132,17 @@ function createEmptyDay(date) {
 
 function loadDay(date) {
   const raw = localStorage.getItem(STORAGE_PREFIX + date);
-  if (raw) return JSON.parse(raw);
 
-  const day = createEmptyDay(date);
+  let day;
+  if (raw) {
+    day = JSON.parse(raw);
+  } else {
+    day = createEmptyDay(date);
+  }
+
+  // 🔒 ALWAYS ensure plans exist
   injectFixedPlan(day);
+
   saveDay(day);
   return day;
 }
@@ -290,12 +297,23 @@ function renderAll() {
 
 function renderWorkout() {
   const el = document.getElementById("workoutArea");
-  if (!el) return;
+  if (!el || !DAY.plan || !DAY.plan.workout) return;
+
   el.innerHTML = "";
-  DAY.plan.workout.exercises.forEach(ex => {
+
+  const exercises = DAY.plan.workout.exercises || [];
+  if (!exercises.length) {
+    el.innerHTML = "<div class='row'>Recovery Day</div>";
+    return;
+  }
+
+  exercises.forEach(ex => {
     const d = document.createElement("div");
     d.className = "row";
-    d.innerHTML = `<span>${ex.exercise}</span><span>${ex.sets} × ${ex.reps}</span>`;
+    d.innerHTML = `
+      <span>${ex.exercise}</span>
+      <span>${ex.sets} × ${ex.reps}</span>
+    `;
     el.appendChild(d);
   });
 }
