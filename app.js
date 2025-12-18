@@ -5,6 +5,9 @@
 const TARGET_DATE = new Date("2026-03-31");
 const START_DATE = new Date("2025-12-18");
 
+const BASE_CALORIES = 3500;
+const BASE_WATER = 3200;
+
 const WORKOUT_PLAN = [
   { name: "Bench Press", sets: 3, reps: 15 },
   { name: "Overhead Press", sets: 3, reps: 15 },
@@ -53,8 +56,10 @@ function nowIST() {
   });
 }
 
-function todayKey() {
-  return new Date().toISOString().slice(0, 10);
+function todayKey(offset = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().slice(0, 10);
 }
 
 /* =====================================================
@@ -82,6 +87,7 @@ function init() {
   renderTodayAI();
   renderAnalysis();
   renderHistory();
+  renderTomorrowPlan();
 }
 
 init();
@@ -99,6 +105,7 @@ function switchTab(tabId) {
 
   if (tabId === "analysis") renderAnalysis();
   if (tabId === "history") renderHistory();
+  if (tabId === "tomorrow") renderTomorrowPlan();
 }
 
 /* =====================================================
@@ -150,10 +157,11 @@ function logMeal(meal, kcal) {
   if (!kcal) return;
   mealLogs[meal] = Number(kcal);
 
+  localStorage.setItem("meals-" + todayKey(), JSON.stringify(mealLogs));
+
   const total = Object.values(mealLogs).reduce((a, b) => a + b, 0);
   nutritionStatus.innerText = `Consumed ${total} kcal`;
 
-  localStorage.setItem("meals-" + todayKey(), JSON.stringify(mealLogs));
   pulse();
 }
 
@@ -189,22 +197,6 @@ function logWater(id) {
   waterLogs.push({ id, date: todayKey(), time: new Date().toISOString() });
   localStorage.setItem("waterLogs", JSON.stringify(waterLogs));
   renderWater();
-  pulse();
-}
-
-/* =====================================================
-   SLEEP
-===================================================== */
-
-function logWake() {
-  wakeDisplay.innerText = `Wake: ${nowIST()}`;
-  localStorage.setItem("wake-" + todayKey(), nowIST());
-  pulse();
-}
-
-function logSleep() {
-  sleepDisplay.innerText = `Sleep: ${nowIST()}`;
-  localStorage.setItem("sleep-" + todayKey(), nowIST());
   pulse();
 }
 
@@ -245,50 +237,42 @@ function renderWeight() {
 
 function renderTodayAI() {
   aiInsights.innerHTML = `
-    <li>Hit all hydration windows</li>
-    <li>Eat all 6 meals</li>
-    <li>Track weight daily</li>
+    <li>Follow all hydration windows</li>
+    <li>Do not skip pre-sleep meal</li>
+    <li>Maintain controlled tempo</li>
   `;
 }
 
 /* =====================================================
-   ANALYSIS TAB
+   ANALYSIS
 ===================================================== */
 
 function renderAnalysis() {
   const el = document.getElementById("analysis");
   if (!el) return;
 
-  let html = `<div class="card"><h2>Analysis</h2>`;
+  const meals = JSON.parse(localStorage.getItem("meals-" + todayKey()) || "{}");
+  const calories = Object.values(meals).reduce((a, b) => a + b, 0);
 
-  if (weightLogs.length >= 2) {
-    const last7 = weightLogs.slice(-7);
-    const avg = last7.reduce((a, b) => a + b.weight, 0) / last7.length;
-    html += `<p><strong>7-day avg weight:</strong> ${avg.toFixed(2)} kg</p>`;
-  }
-
-  const mealsToday = JSON.parse(localStorage.getItem("meals-" + todayKey()) || "{}");
-  const calories = Object.values(mealsToday).reduce((a, b) => a + b, 0);
-  html += `<p><strong>Calories today:</strong> ${calories} kcal</p>`;
-
-  const waterToday = waterLogs
+  const water = waterLogs
     .filter(w => w.date === todayKey())
     .reduce((a, b) => {
       const plan = WATER_PLAN.find(p => p.id === b.id);
       return a + (plan ? plan.amount : 0);
     }, 0);
 
-  html += `<p><strong>Hydration today:</strong> ${waterToday} ml</p>`;
-
-  html += `<p><strong>Wake:</strong> ${localStorage.getItem("wake-" + todayKey()) || "–"}</p>`;
-  html += `<p><strong>Sleep:</strong> ${localStorage.getItem("sleep-" + todayKey()) || "–"}</p>`;
-
-  html += `</div>`;
-  el.innerHTML = html;
+  el.innerHTML = `
+    <div class="card">
+      <h2>Analysis</h2>
+      <p><strong>Calories:</strong> ${calories} kcal</p>
+      <p><strong>Hydration:</strong> ${water} ml</p>
+      <p><strong>Weight logs:</strong> ${weightLogs.length}</p>
+    </div>
+  `;
 }
 
 /* =====================================================
-   HISTORY TAB — LOGS + CSV
+   HISTORY
 ===================================================== */
 
 function renderHistory() {
@@ -296,7 +280,6 @@ function renderHistory() {
   if (!el) return;
 
   let html = `<div class="card"><h2>History</h2>`;
-
   html += `<button class="btn-secondary" onclick="exportCSV()">Export CSV</button>`;
   html += `<div style="margin-top:12px;font-size:13px;">`;
 
@@ -323,4 +306,38 @@ function exportCSV() {
   a.click();
 
   URL.revokeObjectURL(url);
+}
+
+/* =====================================================
+   TOMORROW’S PLAN — AI LOGIC STUB
+===================================================== */
+
+function renderTomorrowPlan() {
+  const el = document.getElementById("tomorrow");
+  if (!el) return;
+
+  const meals = JSON.parse(localStorage.getItem("meals-" + todayKey()) || "{}");
+  const caloriesToday = Object.values(meals).reduce((a, b) => a + b, 0);
+
+  const calorieDelta = caloriesToday - BASE_CALORIES;
+  const calorieAdjustment = calorieDelta < -300 ? "+300 kcal" : "Maintain";
+
+  const hydrationToday = waterLogs
+    .filter(w => w.date === todayKey())
+    .length;
+
+  const hydrationNote =
+    hydrationToday < WATER_PLAN.length
+      ? "Increase hydration consistency"
+      : "Hydration on track";
+
+  el.innerHTML = `
+    <div class="card">
+      <h2>Tomorrow’s Plan</h2>
+      <p><strong>Workout:</strong> Same exercises · Adjust tempo if fatigued</p>
+      <p><strong>Calories:</strong> ${BASE_CALORIES} kcal (${calorieAdjustment})</p>
+      <p><strong>Hydration:</strong> ${BASE_WATER} ml · ${hydrationNote}</p>
+      <p><strong>Focus:</strong> Sleep quality + meal timing</p>
+    </div>
+  `;
 }
