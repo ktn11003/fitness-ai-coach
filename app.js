@@ -81,6 +81,7 @@ function init() {
   renderWeight();
   renderTodayAI();
   renderAnalysis();
+  renderHistory();
 }
 
 init();
@@ -97,6 +98,7 @@ function switchTab(tabId) {
   document.getElementById(tabId).classList.add("active");
 
   if (tabId === "analysis") renderAnalysis();
+  if (tabId === "history") renderHistory();
 }
 
 /* =====================================================
@@ -238,43 +240,37 @@ function renderWeight() {
 }
 
 /* =====================================================
-   TODAY AI (STATIC FOR NOW)
+   TODAY AI (STATIC)
 ===================================================== */
 
 function renderTodayAI() {
   aiInsights.innerHTML = `
     <li>Hit all hydration windows</li>
     <li>Eat all 6 meals</li>
-    <li>Track morning weight</li>
+    <li>Track weight daily</li>
   `;
 }
 
 /* =====================================================
-   ANALYSIS TAB — LOGIC ONLY
+   ANALYSIS TAB
 ===================================================== */
 
 function renderAnalysis() {
   const el = document.getElementById("analysis");
   if (!el) return;
 
-  let output = `<div class="card"><h2>Analysis</h2>`;
+  let html = `<div class="card"><h2>Analysis</h2>`;
 
-  /* Weight trend */
   if (weightLogs.length >= 2) {
     const last7 = weightLogs.slice(-7);
-    const avg =
-      last7.reduce((a, b) => a + b.weight, 0) / last7.length;
-    output += `<p><strong>7-day avg weight:</strong> ${avg.toFixed(2)} kg</p>`;
-  } else {
-    output += `<p><strong>Weight:</strong> Not enough data yet</p>`;
+    const avg = last7.reduce((a, b) => a + b.weight, 0) / last7.length;
+    html += `<p><strong>7-day avg weight:</strong> ${avg.toFixed(2)} kg</p>`;
   }
 
-  /* Calories */
   const mealsToday = JSON.parse(localStorage.getItem("meals-" + todayKey()) || "{}");
   const calories = Object.values(mealsToday).reduce((a, b) => a + b, 0);
-  output += `<p><strong>Calories today:</strong> ${calories || 0} kcal</p>`;
+  html += `<p><strong>Calories today:</strong> ${calories} kcal</p>`;
 
-  /* Hydration */
   const waterToday = waterLogs
     .filter(w => w.date === todayKey())
     .reduce((a, b) => {
@@ -282,14 +278,49 @@ function renderAnalysis() {
       return a + (plan ? plan.amount : 0);
     }, 0);
 
-  output += `<p><strong>Hydration today:</strong> ${waterToday} ml</p>`;
+  html += `<p><strong>Hydration today:</strong> ${waterToday} ml</p>`;
 
-  /* Sleep */
-  const wake = localStorage.getItem("wake-" + todayKey());
-  const sleep = localStorage.getItem("sleep-" + todayKey());
-  output += `<p><strong>Wake:</strong> ${wake || "–"}</p>`;
-  output += `<p><strong>Sleep:</strong> ${sleep || "–"}</p>`;
+  html += `<p><strong>Wake:</strong> ${localStorage.getItem("wake-" + todayKey()) || "–"}</p>`;
+  html += `<p><strong>Sleep:</strong> ${localStorage.getItem("sleep-" + todayKey()) || "–"}</p>`;
 
-  output += `</div>`;
-  el.innerHTML = output;
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* =====================================================
+   HISTORY TAB — LOGS + CSV
+===================================================== */
+
+function renderHistory() {
+  const el = document.getElementById("history");
+  if (!el) return;
+
+  let html = `<div class="card"><h2>History</h2>`;
+
+  html += `<button class="btn-secondary" onclick="exportCSV()">Export CSV</button>`;
+  html += `<div style="margin-top:12px;font-size:13px;">`;
+
+  weightLogs.forEach(w => {
+    html += `<div>${w.date} — ${w.weight} kg</div>`;
+  });
+
+  html += `</div></div>`;
+  el.innerHTML = html;
+}
+
+function exportCSV() {
+  let csv = "date,weight\n";
+  weightLogs.forEach(w => {
+    csv += `${w.date},${w.weight}\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "fitness_history.csv";
+  a.click();
+
+  URL.revokeObjectURL(url);
 }
