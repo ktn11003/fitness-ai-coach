@@ -1,53 +1,29 @@
-/* =========================
-   CONFIG
-========================= */
-
 const TARGET_DATE = new Date("2026-03-31");
 const START_DATE = new Date("2025-12-18");
 
-const WORKOUT = {
-  type: "Push Day",
-  focus: "Controlled volume",
-  exercises: [
-    { name: "Bench Press", sets: 3, targetReps: 15 },
-    { name: "Overhead Press", sets: 3, targetReps: 15 },
-    { name: "Triceps Pushdown", sets: 3, targetReps: 15 }
-  ]
-};
+const exercises = [
+  { name: "Bench Press", sets: 3 },
+  { name: "Overhead Press", sets: 3 },
+  { name: "Triceps Pushdown", sets: 3 }
+];
 
-/* =========================
-   STATE
-========================= */
+let session = { start: null, end: null };
 
-let workoutSession = {
-  startedAt: null,
-  endedAt: null,
-  sets: [] // { exercise, set, reps, time }
-};
-
-/* =========================
-   PROGRESS BAR
-========================= */
-
-function startProgress() {
+/* PROGRESS */
+function pulse() {
   const bar = document.getElementById("progressBar");
   bar.style.opacity = "1";
-  bar.style.width = "70%";
-}
-
-function endProgress() {
-  const bar = document.getElementById("progressBar");
-  bar.style.width = "100%";
+  bar.style.width = "80%";
   setTimeout(() => {
-    bar.style.opacity = "0";
-    bar.style.width = "0%";
-  }, 400);
+    bar.style.width = "100%";
+    setTimeout(() => {
+      bar.style.opacity = "0";
+      bar.style.width = "0%";
+    }, 300);
+  }, 300);
 }
 
-/* =========================
-   INIT
-========================= */
-
+/* INIT */
 function init() {
   renderDates();
   renderWorkout();
@@ -55,10 +31,9 @@ function init() {
 }
 
 function renderDates() {
-  const today = new Date();
-
+  const now = new Date();
   document.getElementById("todayDate").innerText =
-    today.toLocaleDateString("en-IN", {
+    now.toLocaleDateString("en-IN", {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -70,110 +45,66 @@ function renderDates() {
     TARGET_DATE.toDateString();
 
   const days =
-    Math.floor((today - START_DATE) / (1000 * 60 * 60 * 24));
+    Math.floor((now - START_DATE) / 86400000);
 
   document.getElementById("dayCount").innerText =
     `Day ${days}`;
 }
 
-/* =========================
-   WORKOUT RENDER
-========================= */
-
 function renderWorkout() {
   const area = document.getElementById("workoutArea");
   area.innerHTML = "";
 
-  WORKOUT.exercises.forEach((ex, exIndex) => {
+  exercises.forEach((ex, i) => {
     const block = document.createElement("div");
-    block.style.marginBottom = "16px";
-
-    const title = document.createElement("div");
-    title.innerHTML = `<strong>${ex.name}</strong> · ${ex.sets} × ${ex.targetReps}`;
-    title.style.marginBottom = "6px";
-    area.appendChild(title);
+    block.innerHTML = `<strong>${ex.name}</strong>`;
+    area.appendChild(block);
 
     for (let s = 1; s <= ex.sets; s++) {
-      const row = document.createElement("div");
-      row.className = "row";
-
-      row.innerHTML = `
-        <span>Set ${s}</span>
-        <input 
-          type="number"
-          min="0"
-          placeholder="Reps"
-          onchange="logSet(${exIndex}, ${s}, this.value)"
-        />
-      `;
-
-      area.appendChild(row);
+      const input = document.createElement("input");
+      input.className = "full";
+      input.placeholder = `Set ${s} reps`;
+      input.onchange = () => logSet();
+      area.appendChild(input);
     }
   });
 }
 
-/* =========================
-   LOGIC
-========================= */
-
-function logSet(exIndex, setNumber, reps) {
-  if (!reps || reps <= 0) return;
-
+function logSet() {
   const now = new Date();
 
-  // Auto start workout
-  if (!workoutSession.startedAt) {
-    workoutSession.startedAt = now;
+  if (!session.start) {
+    session.start = now;
     document.getElementById("startTime").innerText =
-      now.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" });
-    startProgress();
+      now.toLocaleTimeString("en-IN");
   }
 
-  workoutSession.sets.push({
-    exercise: WORKOUT.exercises[exIndex].name,
-    set: setNumber,
-    reps: Number(reps),
-    time: now.toISOString()
-  });
-
-  workoutSession.endedAt = now;
-
-  updateWorkoutMeta();
-  endProgress();
-}
-
-function updateWorkoutMeta() {
-  if (!workoutSession.startedAt || !workoutSession.endedAt) return;
-
-  const start = workoutSession.startedAt;
-  const end = workoutSession.endedAt;
-
+  session.end = now;
   document.getElementById("endTime").innerText =
-    end.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" });
+    now.toLocaleTimeString("en-IN");
 
-  const diff = end - start;
-  const mins = Math.floor(diff / 60000);
-  const secs = Math.floor((diff % 60000) / 1000);
-
+  const diff = session.end - session.start;
   document.getElementById("duration").innerText =
-    `${mins} min ${secs} sec`;
+    Math.floor(diff / 60000) + " min";
+
+  pulse();
 }
 
-/* =========================
-   AI (PLACEHOLDER, INTENTIONAL)
-========================= */
+function logWater() {
+  pulse();
+}
 
 function renderAI() {
   const ul = document.getElementById("aiInsights");
   ul.innerHTML = "";
 
   [
-    "Begin with controlled tempo on compound lifts.",
-    "If reps drop significantly, extend rest slightly.",
-    "Ensure calorie surplus is maintained post-workout."
-  ].forEach(text => {
+    "Keep rest consistent across sets.",
+    "Hydrate before the next session.",
+    "Ensure calorie surplus by dinner."
+  ].forEach(t => {
     const li = document.createElement("li");
-    li.innerText = text;
+    li.innerText = t;
     ul.appendChild(li);
   });
 }
