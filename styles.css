@@ -112,3 +112,12 @@ button {
   color: white;
   font-size: 14px;
 }
+.meal {
+  margin-top: 12px;
+}
+
+.meal-head {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 6px;
+}
