@@ -1,360 +1,75 @@
-/* =====================================================
-   DESIGN TOKENS
-===================================================== */
-
-:root {
-  /* Colors */
-  --bg: #f6f7fb;
-  --card: #ffffff;
-  --text: #111827;
-  --muted: #6b7280;
-  --accent: #2563eb;
-  --line: #e5e7eb;
-
-  /* Spacing scale */
-  --space-xs: 6px;
-  --space-s: 10px;
-  --space-m: 14px;
-  --space-l: 16px;
-  --space-xl: 20px;
-
-  /* Radius */
-  --radius-m: 12px;
-  --radius-l: 16px;
-}
-
-/* =====================================================
-   RESET & BASE
-===================================================== */
-
 * {
   box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
 }
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
+  background: #0e0e11;
+  color: #ffffff;
 }
 
-button {
-  width: auto;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-
-/* =====================================================
-   PROGRESS BAR
-===================================================== */
-
-#progressContainer {
+.progress-bar {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
   height: 3px;
-  z-index: 1000;
-}
-
-#progressBar {
-  height: 3px;
-  width: 0%;
-  background: var(--accent);
+  width: 0;
+  background: #4f9cff;
   opacity: 0;
-  transition: width 0.4s ease, opacity 0.3s ease;
+  transition: width 0.3s ease, opacity 0.3s ease;
 }
 
-/* =====================================================
-   TABS
-===================================================== */
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+}
 
-.tabs {
-  position: sticky;
-  top: 0;
-  z-index: 900;
-  background: var(--bg);
+.header {
   display: flex;
-  gap: var(--space-s);
-  padding: var(--space-s) var(--space-xl);
-  border-bottom: 1px solid var(--line);
-}
-
-.tab {
-  padding: 6px 10px;
-  font-size: 13px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  color: var(--muted);
-}
-
-.tab.active {
-  color: var(--text);
-  background: var(--card);
-  border-color: var(--line);
-}
-
-/* =====================================================
-   TAB PAGES
-===================================================== */
-
-.tab-page {
-  display: none;
-}
-
-.tab-page.active {
-  display: block;
-}
-
-.placeholder {
-  padding: var(--space-xl);
-  color: var(--muted);
+  justify-content: space-between;
+  margin-bottom: 16px;
   font-size: 14px;
+  opacity: 0.8;
 }
-
-/* =====================================================
-   HEADER
-===================================================== */
-
-.top {
-  padding: var(--space-xl);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-}
-
-.header-block {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.title {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.meta {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.inline-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-}
-
-/* =====================================================
-   GRID LAYOUT
-===================================================== */
-
-.grid {
-  display: grid;
-  gap: var(--space-l);
-  padding: var(--space-l) var(--space-xl);
-}
-
-@media (min-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* =====================================================
-   CARD
-===================================================== */
 
 .card {
-  background: var(--card);
-  border-radius: var(--radius-l);
-  padding: var(--space-l);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-m);
+  background: #17171c;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
 }
 
-.card h2 {
-  font-size: 15px;
-  font-weight: 600;
-  margin: 0;
+h2 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
 }
-
-/* Enforced vertical rhythm */
-.card > * + * {
-  margin-top: var(--space-s);
-}
-
-/* =====================================================
-   ROWS & LAYOUT BLOCKS
-===================================================== */
 
 .row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--space-s);
+  margin: 6px 0;
 }
 
-.row-grid {
-  display: grid;
-  grid-template-columns: 1fr auto auto 72px;
-  align-items: center;
-  gap: var(--space-s);
+button {
+  background: #4f9cff;
+  border: none;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-/* =====================================================
-   INPUTS
-===================================================== */
+button:disabled {
+  opacity: 0.4;
+}
 
 input {
-  width: 100%;
-  padding: 6px 8px;
-  border-radius: var(--radius-m);
-  border: 1px solid var(--line);
-  font-size: 13px;
-  background: #ffffff;
-}
-
-input:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-
-/* =====================================================
-   BUTTONS
-===================================================== */
-
-.btn-secondary {
-  padding: 4px 8px;
-  font-size: 12px;
-  border-radius: var(--radius-m);
-  border: 1px solid var(--line);
-  background: #ffffff;
-  line-height: 1.2;
-}
-
-.btn-secondary:hover {
-  background: #f3f4f6;
-}
-
-/* Smaller hydration buttons */
-#waterArea .btn-secondary {
-  padding: 3px 6px;
-  font-size: 11px;
-}
-
-/* =====================================================
-   BADGES
-===================================================== */
-
-.badge {
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: #eef2ff;
-  color: #3730a3;
-  white-space: nowrap;
-}
-
-/* =====================================================
-   WORKOUT
-===================================================== */
-
-.exercise {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-}
-
-.exercise-title {
-  font-weight: 600;
-}
-
-.set-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-}
-
-/* =====================================================
-   META ROW
-===================================================== */
-
-.meta-row {
-  display: flex;
-  gap: var(--space-m);
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* =====================================================
-   HYDRATION
-===================================================== */
-
-#waterArea {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-}
-
-/* =====================================================
-   LISTS (AI NOTES)
-===================================================== */
-
-ul {
-  padding-left: 18px;
-  margin: 0;
-}
-
-li {
-  font-size: 13px;
-  margin-bottom: var(--space-xs);
-}
-
-/* =====================================================
-   MOBILE COMPRESSION
-===================================================== */
-
-@media (max-width: 600px) {
-
-  .top {
-    padding: var(--space-m);
-  }
-
-  .grid {
-    padding: var(--space-m);
-    gap: var(--space-m);
-  }
-
-  .card {
-    padding: var(--space-m);
-    gap: var(--space-s);
-  }
-
-  .card h2 {
-    font-size: 14px;
-  }
-
-  .row,
-  .row-grid {
-    gap: var(--space-xs);
-  }
-
-  .set-row {
-    gap: var(--space-xs);
-  }
-
-  input {
-    padding: 4px 6px;
-    font-size: 12px;
-  }
-
-  li {
-    font-size: 12px;
-    margin-bottom: 4px;
-  }
+  background: #0e0e11;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 6px;
+  border-radius: 6px;
 }
