@@ -26,7 +26,6 @@ const WATER_PLAN = [
 let workoutState = { start: null, end: null };
 let mealLogs = {};
 let waterLogs = JSON.parse(localStorage.getItem("waterLogs") || "[]");
-
 let weightLogs = JSON.parse(localStorage.getItem("weightLogs") || "[]");
 let baselineWeight = localStorage.getItem("baselineWeight");
 
@@ -38,7 +37,6 @@ function pulse() {
   const bar = document.getElementById("progressBar");
   bar.style.opacity = 1;
   bar.style.width = "90%";
-
   setTimeout(() => {
     bar.style.width = "100%";
     setTimeout(() => {
@@ -49,7 +47,14 @@ function pulse() {
 }
 
 function nowIST() {
-  return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+  return new Date().toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 /* =====================================================
@@ -59,24 +64,23 @@ function nowIST() {
 function init() {
   const now = new Date();
 
-  document.getElementById("todayDate").innerText =
-    now.toLocaleDateString("en-IN", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric"
-    });
+  todayDate.innerText = now.toLocaleDateString("en-IN", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
 
-  document.getElementById("targetDate").innerText =
-    TARGET_DATE.toDateString();
+  targetDate.innerText = TARGET_DATE.toDateString();
 
   const dayDiff = Math.floor((now - START_DATE) / 86400000);
-  document.getElementById("dayCount").innerText = `Day ${dayDiff}`;
+  dayCount.innerText = `Day ${dayDiff}`;
 
   renderWorkout();
   renderWater();
   renderWeight();
-  renderAI();
+  renderTodayAI();
+  renderAnalysis();
 }
 
 init();
@@ -91,6 +95,8 @@ function switchTab(tabId) {
 
   document.querySelector(`.tab[onclick*="${tabId}"]`).classList.add("active");
   document.getElementById(tabId).classList.add("active");
+
+  if (tabId === "analysis") renderAnalysis();
 }
 
 /* =====================================================
@@ -98,28 +104,22 @@ function switchTab(tabId) {
 ===================================================== */
 
 function renderWorkout() {
-  const container = document.getElementById("workoutArea");
-  container.innerHTML = "";
+  workoutArea.innerHTML = "";
 
   WORKOUT_PLAN.forEach(ex => {
     const block = document.createElement("div");
     block.className = "exercise";
-
-    block.innerHTML = `
-      <div class="exercise-title">${ex.name} · ${ex.sets} × ${ex.reps}</div>
-    `;
+    block.innerHTML = `<div class="exercise-title">${ex.name} · ${ex.sets} × ${ex.reps}</div>`;
 
     for (let i = 1; i <= ex.sets; i++) {
-      const row = document.createElement("div");
-      row.className = "set-row";
-      row.innerHTML = `
-        <span>Set ${i}</span>
-        <input placeholder="reps" onchange="logSet()" />
+      block.innerHTML += `
+        <div class="set-row">
+          <span>Set ${i}</span>
+          <input placeholder="reps" onchange="logSet()" />
+        </div>
       `;
-      block.appendChild(row);
     }
-
-    container.appendChild(block);
+    workoutArea.appendChild(block);
   });
 }
 
@@ -128,14 +128,14 @@ function logSet() {
 
   if (!workoutState.start) {
     workoutState.start = now;
-    document.getElementById("startTime").innerText = nowIST();
+    startTime.innerText = nowIST();
   }
 
   workoutState.end = now;
-  document.getElementById("endTime").innerText = nowIST();
+  endTime.innerText = nowIST();
 
   const mins = Math.floor((workoutState.end - workoutState.start) / 60000);
-  document.getElementById("duration").innerText = `${mins} min`;
+  duration.innerText = `${mins} min`;
 
   pulse();
 }
@@ -149,9 +149,9 @@ function logMeal(meal, kcal) {
   mealLogs[meal] = Number(kcal);
 
   const total = Object.values(mealLogs).reduce((a, b) => a + b, 0);
-  document.getElementById("nutritionStatus").innerText =
-    `Consumed ${total} kcal`;
+  nutritionStatus.innerText = `Consumed ${total} kcal`;
 
+  localStorage.setItem("meals-" + todayKey(), JSON.stringify(mealLogs));
   pulse();
 }
 
@@ -160,41 +160,31 @@ function logMeal(meal, kcal) {
 ===================================================== */
 
 function renderWater() {
-  const container = document.getElementById("waterArea");
-  container.innerHTML = "";
-
+  waterArea.innerHTML = "";
   let total = 0;
 
   WATER_PLAN.forEach(w => {
-    const done = waterLogs.find(x => x.id === w.id);
+    const done = waterLogs.find(x => x.id === w.id && x.date === todayKey());
     if (done) total += w.amount;
 
-    const row = document.createElement("div");
-    row.className = "row";
-
-    row.innerHTML = `
-      <span>${w.label} <span class="badge">${w.time}</span></span>
-      <span class="meta">${w.amount} ml</span>
-      ${
-        done
-          ? `<span class="meta">✓</span>`
-          : `<button class="btn-secondary" onclick="logWater(${w.id})">Done</button>`
-      }
+    waterArea.innerHTML += `
+      <div class="row">
+        <span>${w.label} <span class="badge">${w.time}</span></span>
+        <span class="meta">${w.amount} ml</span>
+        ${
+          done
+            ? `<span class="meta">✓</span>`
+            : `<button class="btn-secondary" onclick="logWater(${w.id})">Done</button>`
+        }
+      </div>
     `;
-
-    container.appendChild(row);
   });
 
-  document.getElementById("waterStatus").innerText =
-    `Consumed ${total} ml`;
+  waterStatus.innerText = `Consumed ${total} ml`;
 }
 
 function logWater(id) {
-  waterLogs.push({
-    id,
-    time: new Date().toISOString()
-  });
-
+  waterLogs.push({ id, date: todayKey(), time: new Date().toISOString() });
   localStorage.setItem("waterLogs", JSON.stringify(waterLogs));
   renderWater();
   pulse();
@@ -205,14 +195,14 @@ function logWater(id) {
 ===================================================== */
 
 function logWake() {
-  document.getElementById("wakeDisplay").innerText =
-    `Wake: ${nowIST()}`;
+  wakeDisplay.innerText = `Wake: ${nowIST()}`;
+  localStorage.setItem("wake-" + todayKey(), nowIST());
   pulse();
 }
 
 function logSleep() {
-  document.getElementById("sleepDisplay").innerText =
-    `Sleep: ${nowIST()}`;
+  sleepDisplay.innerText = `Sleep: ${nowIST()}`;
+  localStorage.setItem("sleep-" + todayKey(), nowIST());
   pulse();
 }
 
@@ -224,12 +214,7 @@ function logWeight() {
   const value = prompt("Enter morning body weight (kg)");
   if (!value) return;
 
-  const entry = {
-    weight: Number(value),
-    time: new Date().toISOString()
-  };
-
-  weightLogs.push(entry);
+  weightLogs.push({ weight: Number(value), date: todayKey() });
   localStorage.setItem("weightLogs", JSON.stringify(weightLogs));
 
   if (!baselineWeight) {
@@ -244,26 +229,67 @@ function logWeight() {
 function renderWeight() {
   if (!weightLogs.length) return;
 
-  const latest = weightLogs[weightLogs.length - 1].weight;
-  document.getElementById("weightDisplay").innerText =
-    `Weight: ${latest} kg`;
+  const latest = weightLogs.at(-1).weight;
+  weightDisplay.innerText = `Weight: ${latest} kg`;
 
   if (baselineWeight) {
-    const delta = (latest - baselineWeight).toFixed(1);
-    document.getElementById("weightMeta").innerText =
-      `Δ ${delta} kg`;
+    weightMeta.innerText = `Δ ${(latest - baselineWeight).toFixed(1)} kg`;
   }
 }
 
 /* =====================================================
-   AI PLACEHOLDER (TODAY)
+   TODAY AI (STATIC FOR NOW)
 ===================================================== */
 
-function renderAI() {
-  const ul = document.getElementById("aiInsights");
-  ul.innerHTML = `
-    <li>Complete all hydration windows</li>
-    <li>Eat all 6 meals on time</li>
-    <li>Track weight daily on waking</li>
+function renderTodayAI() {
+  aiInsights.innerHTML = `
+    <li>Hit all hydration windows</li>
+    <li>Eat all 6 meals</li>
+    <li>Track morning weight</li>
   `;
+}
+
+/* =====================================================
+   ANALYSIS TAB — LOGIC ONLY
+===================================================== */
+
+function renderAnalysis() {
+  const el = document.getElementById("analysis");
+  if (!el) return;
+
+  let output = `<div class="card"><h2>Analysis</h2>`;
+
+  /* Weight trend */
+  if (weightLogs.length >= 2) {
+    const last7 = weightLogs.slice(-7);
+    const avg =
+      last7.reduce((a, b) => a + b.weight, 0) / last7.length;
+    output += `<p><strong>7-day avg weight:</strong> ${avg.toFixed(2)} kg</p>`;
+  } else {
+    output += `<p><strong>Weight:</strong> Not enough data yet</p>`;
+  }
+
+  /* Calories */
+  const mealsToday = JSON.parse(localStorage.getItem("meals-" + todayKey()) || "{}");
+  const calories = Object.values(mealsToday).reduce((a, b) => a + b, 0);
+  output += `<p><strong>Calories today:</strong> ${calories || 0} kcal</p>`;
+
+  /* Hydration */
+  const waterToday = waterLogs
+    .filter(w => w.date === todayKey())
+    .reduce((a, b) => {
+      const plan = WATER_PLAN.find(p => p.id === b.id);
+      return a + (plan ? plan.amount : 0);
+    }, 0);
+
+  output += `<p><strong>Hydration today:</strong> ${waterToday} ml</p>`;
+
+  /* Sleep */
+  const wake = localStorage.getItem("wake-" + todayKey());
+  const sleep = localStorage.getItem("sleep-" + todayKey());
+  output += `<p><strong>Wake:</strong> ${wake || "–"}</p>`;
+  output += `<p><strong>Sleep:</strong> ${sleep || "–"}</p>`;
+
+  output += `</div>`;
+  el.innerHTML = output;
 }
