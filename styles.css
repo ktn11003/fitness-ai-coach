@@ -68,6 +68,53 @@ button {
 }
 
 /* =====================================================
+   TABS
+===================================================== */
+
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  background: var(--bg);
+  display: flex;
+  gap: var(--space-s);
+  padding: var(--space-s) var(--space-xl);
+  border-bottom: 1px solid var(--line);
+}
+
+.tab {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  color: var(--muted);
+}
+
+.tab.active {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--line);
+}
+
+/* =====================================================
+   TAB PAGES
+===================================================== */
+
+.tab-page {
+  display: none;
+}
+
+.tab-page.active {
+  display: block;
+}
+
+.placeholder {
+  padding: var(--space-xl);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* =====================================================
    HEADER
 ===================================================== */
 
@@ -136,7 +183,7 @@ button {
   margin: 0;
 }
 
-/* Enforced vertical rhythm inside cards */
+/* Enforced vertical rhythm */
 .card > * + * {
   margin-top: var(--space-s);
 }
@@ -194,7 +241,7 @@ input:focus {
   background: #f3f4f6;
 }
 
-/* Hydration buttons explicitly small */
+/* Smaller hydration buttons */
 #waterArea .btn-secondary {
   padding: 3px 6px;
   font-size: 11px;
@@ -255,7 +302,7 @@ input:focus {
 }
 
 /* =====================================================
-   LISTS (AI COACH)
+   LISTS (AI NOTES)
 ===================================================== */
 
 ul {
