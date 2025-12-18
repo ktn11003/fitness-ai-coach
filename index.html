@@ -9,41 +9,31 @@
 
 <body>
 
-  <!-- Progress Bar -->
+  <!-- Progress bar -->
   <div id="progressBar" class="progress-bar"></div>
 
-  <!-- PAGE CONTAINER -->
   <div class="container">
 
-    <!-- HEADER -->
     <header class="header">
-      <div class="date">
-        <script>
-          document.write(new Date().toDateString());
-        </script>
-      </div>
+      <div id="todayDate" class="date"></div>
       <div class="target">Target: 31 March 2026</div>
     </header>
 
-    <!-- WORKOUT CARD -->
     <section class="card">
       <h2>Workout — Today</h2>
       <div id="workoutArea"></div>
     </section>
 
-    <!-- NUTRITION CARD -->
     <section class="card">
       <h2>Nutrition</h2>
       <div id="nutritionRows"></div>
     </section>
 
-    <!-- HYDRATION CARD -->
     <section class="card">
       <h2>Hydration</h2>
       <div id="waterArea"></div>
     </section>
 
-    <!-- SLEEP CARD -->
     <section class="card">
       <h2>Sleep</h2>
       <div class="row">
@@ -56,32 +46,21 @@
       </div>
     </section>
 
-    <!-- WEIGHT CARD -->
     <section class="card">
       <h2>Weight</h2>
       <div class="row">
-        <input
-          type="number"
-          step="0.1"
-          placeholder="Enter weight (kg)"
-          id="weightInput"
-        />
-        <button onclick="logWeight(document.getElementById('weightInput').value)">
-          Log
-        </button>
+        <input id="weightInput" type="number" step="0.1" placeholder="Enter weight (kg)" />
+        <button onclick="logWeight(document.getElementById('weightInput').value)">Log</button>
         <span id="weightDisplay">Weight: –</span>
       </div>
     </section>
 
-    <!-- EXPORT -->
     <section class="card">
       <button onclick="exportCSV()">Download CSV</button>
     </section>
 
   </div>
 
-  <!-- APP LOGIC -->
   <script src="app.js"></script>
-
 </body>
 </html>
