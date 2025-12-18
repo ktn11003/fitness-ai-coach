@@ -36,10 +36,10 @@ body {
 
 /* Header */
 .top {
-  padding:16px 20px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
 }
 
 .title { font-size:18px; font-weight:600; }
