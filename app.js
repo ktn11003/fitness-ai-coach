@@ -1,21 +1,31 @@
 const TARGET_DATE = new Date("2026-03-31");
 const START_DATE = new Date("2025-12-18");
 
-const exercises = [
-  "Bench Press",
-  "Overhead Press",
-  "Triceps Pushdown"
-];
+const exercises = ["Bench Press", "Overhead Press", "Triceps Pushdown"];
+let workoutStartedAt = null;
+let workoutEndedAt = null;
 
-const session = {
-  start: null,
-  end: null
-};
+/* PROGRESS BAR */
+function startProgress() {
+  const bar = document.getElementById("progressBar");
+  bar.style.opacity = "1";
+  bar.style.width = "70%";
+}
 
+function endProgress() {
+  const bar = document.getElementById("progressBar");
+  bar.style.width = "100%";
+  setTimeout(() => {
+    bar.style.opacity = "0";
+    bar.style.width = "0%";
+  }, 400);
+}
+
+/* INIT */
 function init() {
   renderDates();
   renderWorkout();
-  renderAINotes();
+  renderAI();
 }
 
 function renderDates() {
@@ -32,41 +42,62 @@ function renderDates() {
   document.getElementById("targetDate").innerText =
     TARGET_DATE.toDateString();
 
-  const dayCount = Math.floor(
-    (today - START_DATE) / (1000 * 60 * 60 * 24)
-  );
+  const days =
+    Math.floor((today - START_DATE) / (1000 * 60 * 60 * 24));
 
   document.getElementById("dayCount").innerText =
-    `Day ${dayCount} of 104`;
+    `Day ${days}`;
 }
 
 function renderWorkout() {
-  const container = document.getElementById("workoutCards");
-  container.innerHTML = "";
+  const area = document.getElementById("workoutArea");
+  area.innerHTML = "";
 
   exercises.forEach(ex => {
-    const card = document.createElement("div");
-    card.className = "exercise-card";
-    card.innerHTML = `
-      <strong>${ex}</strong>
-      <p class="muted">3 × 15 reps</p>
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `
+      <span>${ex} · 3 × 15</span>
+      <input placeholder="Set 1 reps" onchange="logSet()" />
     `;
-    container.appendChild(card);
+    area.appendChild(row);
   });
 }
 
-function renderAINotes() {
-  const notes = document.getElementById("aiNotes");
-  notes.innerHTML = "";
+function logSet() {
+  if (!workoutStartedAt) {
+    workoutStartedAt = new Date();
+    document.getElementById("startTime").innerText =
+      workoutStartedAt.toLocaleTimeString("en-IN");
+    startProgress();
+  }
+  workoutEndedAt = new Date();
+  document.getElementById("endTime").innerText =
+    workoutEndedAt.toLocaleTimeString("en-IN");
 
+  const diff = workoutEndedAt - workoutStartedAt;
+  document.getElementById("duration").innerText =
+    Math.floor(diff / 60000) + " min";
+
+  endProgress();
+}
+
+function logWater() {
+  startProgress();
+  setTimeout(endProgress, 600);
+}
+
+function renderAI() {
+  const ul = document.getElementById("aiInsights");
+  ul.innerHTML = "";
   [
-    "Prioritize form over intensity today.",
-    "Hydration will influence your endurance.",
-    "Consistent sleep tonight will improve tomorrow’s output."
-  ].forEach(text => {
+    "Focus on controlled reps today.",
+    "Hydration will impact endurance.",
+    "Ensure calorie surplus by dinner."
+  ].forEach(t => {
     const li = document.createElement("li");
-    li.innerText = text;
-    notes.appendChild(li);
+    li.innerText = t;
+    ul.appendChild(li);
   });
 }
 
