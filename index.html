@@ -8,71 +8,65 @@
 </head>
 <body>
 
+<!-- TOP PROGRESS BAR -->
+<div id="progressContainer">
+  <div id="progressBar"></div>
+</div>
+
 <div class="app">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="logo">Fitness OS</div>
-    <nav>
-      <a class="active">Today</a>
-      <a>Workout</a>
-      <a>Nutrition</a>
-      <a>Hydration</a>
-      <a>Sleep</a>
-      <a>Analysis</a>
-    </nav>
-  </aside>
+  <header class="app-header">
+    <h1>Fitness OS</h1>
+    <div class="context">
+      <span id="todayDate"></span>
+      <span>·</span>
+      <span>Target: <strong id="targetDate"></strong></span>
+      <span>·</span>
+      <span id="dayCount"></span>
+    </div>
+  </header>
 
-  <!-- MAIN -->
-  <main class="main">
+  <!-- WORKOUT -->
+  <section class="section">
+    <h2>Workout</h2>
+    <div id="workoutArea"></div>
+    <div class="meta">
+      <span>Start: <strong id="startTime">–</strong></span>
+      <span>End: <strong id="endTime">–</strong></span>
+      <span>Duration: <strong id="duration">–</strong></span>
+    </div>
+  </section>
 
-    <!-- HEADER -->
-    <section class="header-card">
-      <div>
-        <h1 id="todayDate">Loading…</h1>
-        <p class="muted">
-          Target: <span id="targetDate"></span> ·
-          <span id="dayCount"></span>
-        </p>
-      </div>
-    </section>
+  <!-- NUTRITION -->
+  <section class="section">
+    <h2>Nutrition</h2>
+    <div class="row">
+      <span>Breakfast · Oats + honey</span>
+      <input placeholder="Actual kcal" />
+    </div>
+    <div class="row">
+      <span>Lunch · Rice, dal, vegetables</span>
+      <input placeholder="Actual kcal" />
+    </div>
+    <div class="row">
+      <span>Dinner · Roti, sabzi, curd</span>
+      <input placeholder="Actual kcal" />
+    </div>
+  </section>
 
-    <!-- WORKOUT -->
-    <section class="card">
-      <h2>Workout — Today</h2>
-      <p class="muted">Push Day · Focus on controlled volume</p>
+  <!-- HYDRATION -->
+  <section class="section">
+    <h2>Hydration</h2>
+    <p>Target: <strong>2.8 L</strong></p>
+    <button onclick="logWater()">Log 250 ml</button>
+  </section>
 
-      <div class="exercise-grid" id="workoutCards"></div>
+  <!-- AI -->
+  <section class="section">
+    <h2>AI Insights</h2>
+    <ul id="aiInsights"></ul>
+  </section>
 
-      <div class="meta">
-        <span>Start: <strong id="startTime">–</strong></span>
-        <span>End: <strong id="endTime">–</strong></span>
-        <span>Duration: <strong id="duration">–</strong></span>
-      </div>
-    </section>
-
-    <!-- NUTRITION + WATER -->
-    <section class="grid-2">
-      <section class="card">
-        <h2>Nutrition</h2>
-        <p class="stat">Target: <strong>3300 kcal</strong></p>
-        <p class="muted">Balanced surplus · Protein priority</p>
-      </section>
-
-      <section class="card">
-        <h2>Hydration</h2>
-        <p class="stat">Target: <strong>2.8 L</strong></p>
-        <p class="muted">Spread evenly through the day</p>
-      </section>
-    </section>
-
-    <!-- AI -->
-    <section class="card ai-card">
-      <h2>AI Coach — Today</h2>
-      <ul id="aiNotes"></ul>
-    </section>
-
-  </main>
 </div>
 
 <script src="app.js"></script>
