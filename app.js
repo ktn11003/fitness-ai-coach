@@ -1,15 +1,27 @@
+/* ================= CONFIG ================= */
+
 const TARGET_DATE = new Date("2026-03-31");
 const START_DATE = new Date("2025-12-18");
 
-const exercises = [
-  { name: "Bench Press", sets: 3 },
-  { name: "Overhead Press", sets: 3 },
-  { name: "Triceps Pushdown", sets: 3 }
+const WORKOUT = [
+  { name: "Bench Press", sets: 3, target: 15 },
+  { name: "Overhead Press", sets: 3, target: 15 },
+  { name: "Triceps Pushdown", sets: 3, target: 15 }
 ];
 
-let session = { start: null, end: null };
+/* ================= STATE ================= */
 
-/* PROGRESS */
+let workoutSession = {
+  start: null,
+  end: null,
+  logs: [] // { exercise, set, reps, time }
+};
+
+let meals = {};
+let sleep = {};
+
+/* ================= PROGRESS ================= */
+
 function pulse() {
   const bar = document.getElementById("progressBar");
   bar.style.opacity = "1";
@@ -23,16 +35,17 @@ function pulse() {
   }, 300);
 }
 
-/* INIT */
+/* ================= INIT ================= */
+
 function init() {
   renderDates();
   renderWorkout();
   renderAI();
-  renderMealTimes();
 }
 
 function renderDates() {
   const now = new Date();
+
   document.getElementById("todayDate").innerText =
     now.toLocaleDateString("en-IN", {
       weekday: "long",
@@ -45,81 +58,76 @@ function renderDates() {
   document.getElementById("targetDate").innerText =
     TARGET_DATE.toDateString();
 
-  const days =
-    Math.floor((now - START_DATE) / 86400000);
-
-  document.getElementById("dayCount").innerText =
-    `Day ${days}`;
+  const days = Math.floor((now - START_DATE) / 86400000);
+  document.getElementById("dayCount").innerText = `Day ${days}`;
 }
+
+/* ================= WORKOUT ================= */
 
 function renderWorkout() {
   const area = document.getElementById("workoutArea");
   area.innerHTML = "";
 
-  exercises.forEach((ex, i) => {
-    const block = document.createElement("div");
-    block.innerHTML = `<strong>${ex.name}</strong>`;
-    area.appendChild(block);
+  WORKOUT.forEach((ex, exIdx) => {
+    const wrap = document.createElement("div");
+    wrap.className = "exercise";
+
+    const title = document.createElement("div");
+    title.className = "exercise-title";
+    title.innerText = `${ex.name} · ${ex.sets}×${ex.target}`;
+    wrap.appendChild(title);
 
     for (let s = 1; s <= ex.sets; s++) {
-      const input = document.createElement("input");
-      input.className = "full";
-      input.placeholder = `Set ${s} reps`;
-      input.onchange = () => logSet();
-      area.appendChild(input);
+      const row = document.createElement("div");
+      row.className = "set-row";
+      row.innerHTML = `
+        <span>Set ${s} (target ${ex.target})</span>
+        <input type="number" placeholder="reps"
+          onchange="logSet(${exIdx}, ${s}, this.value)" />
+      `;
+      wrap.appendChild(row);
     }
+
+    area.appendChild(wrap);
   });
 }
 
-function logSet() {
+function logSet(exIdx, setNo, reps) {
+  if (!reps || reps <= 0) return;
+
   const now = new Date();
 
-  if (!session.start) {
-    session.start = now;
+  if (!workoutSession.start) {
+    workoutSession.start = now;
     document.getElementById("startTime").innerText =
       now.toLocaleTimeString("en-IN");
   }
 
-  session.end = now;
-  document.getElementById("endTime").innerText =
-    now.toLocaleTimeString("en-IN");
+  workoutSession.logs.push({
+    exercise: WORKOUT[exIdx].name,
+    set: setNo,
+    reps: Number(reps),
+    time: now
+  });
 
-  const diff = session.end - session.start;
+  workoutSession.end = now;
+  updateWorkoutMeta();
+  pulse();
+}
+
+function updateWorkoutMeta() {
+  const { start, end } = workoutSession;
+  if (!start || !end) return;
+
+  document.getElementById("endTime").innerText =
+    end.toLocaleTimeString("en-IN");
+
+  const diff = end - start;
   document.getElementById("duration").innerText =
     Math.floor(diff / 60000) + " min";
-
-  pulse();
 }
 
-function logWater() {
-  pulse();
-}
-
-function renderAI() {
-  const ul = document.getElementById("aiInsights");
-  ul.innerHTML = "";
-
-  [
-    "Keep rest consistent across sets.",
-    "Hydrate before the next session.",
-    "Ensure calorie surplus by dinner."
-  ].forEach(t => {
-    const li = document.createElement("li");
-    li.innerText = t;
-    ul.appendChild(li);
-  });
-}
-
-init();
-/* ======================
-   NUTRITION
-====================== */
-
-let meals = {
-  breakfast: null,
-  lunch: null,
-  dinner: null
-};
+/* ================= NUTRITION ================= */
 
 function logMeal(meal, kcal) {
   if (!kcal || kcal <= 0) return;
@@ -129,90 +137,54 @@ function logMeal(meal, kcal) {
     time: new Date()
   };
 
-  const total =
-    (meals.breakfast?.kcal || 0) +
-    (meals.lunch?.kcal || 0) +
-    (meals.dinner?.kcal || 0);
+  const total = Object.values(meals)
+    .reduce((a, b) => a + b.kcal, 0);
 
-  const status = document.getElementById("nutritionStatus");
-  status.innerText =
-    `Consumed: ${total} kcal · Logged at ${new Date().toLocaleTimeString("en-IN")}`;
+  document.getElementById("nutritionStatus").innerText =
+    `Consumed: ${total} kcal`;
 
   pulse();
 }
 
-/* ======================
-   SLEEP
-====================== */
+/* ================= HYDRATION ================= */
 
-let sleep = {
-  off: null,
-  wake: null
-};
+function logWater() {
+  pulse();
+}
+
+/* ================= SLEEP ================= */
 
 function logSleep(type) {
   const now = new Date();
 
+  sleep[type] = now;
+
   if (type === "off") {
-    sleep.off = now;
     document.getElementById("sleepOff").innerText =
-      `Switch-off: ${now.toLocaleTimeString("en-IN")}`;
-  }
-
-  if (type === "wake") {
-    sleep.wake = now;
+      `Off: ${now.toLocaleTimeString("en-IN")}`;
+  } else {
     document.getElementById("sleepWake").innerText =
-      `Wake-up: ${now.toLocaleTimeString("en-IN")}`;
+      `Wake: ${now.toLocaleTimeString("en-IN")}`;
   }
 
   pulse();
 }
-/* ======================
-   MEAL TIMING (IST)
-====================== */
 
-const mealWindows = {
-  breakfast: "8:00 – 9:30",
-  lunch: "13:00 – 14:30",
-  dinner: "20:00 – 21:30"
-};
+/* ================= AI ================= */
 
-function renderMealTimes() {
-  document.getElementById("bfTime").innerText = mealWindows.breakfast;
-  document.getElementById("lnTime").innerText = mealWindows.lunch;
-  document.getElementById("dnTime").innerText = mealWindows.dinner;
+function renderAI() {
+  const ul = document.getElementById("aiInsights");
+  ul.innerHTML = "";
+
+  [
+    "Aim to hit target reps across all sets.",
+    "If reps drop, extend rest slightly.",
+    "Meal timing consistency improves recovery."
+  ].forEach(t => {
+    const li = document.createElement("li");
+    li.innerText = t;
+    ul.appendChild(li);
+  });
 }
 
-/* ======================
-   NUTRITION STATE
-====================== */
-
-let meals = {
-  breakfast: null,
-  lunch: null,
-  dinner: null
-};
-
-function logMeal(meal, kcal) {
-  if (!kcal || kcal <= 0) return;
-
-  const now = new Date();
-
-  meals[meal] = {
-    kcal: Number(kcal),
-    time: now
-  };
-
-  const total =
-    (meals.breakfast?.kcal || 0) +
-    (meals.lunch?.kcal || 0) +
-    (meals.dinner?.kcal || 0);
-
-  document.getElementById("nutritionStatus").innerText =
-    `Consumed: ${total} kcal · Last log: ${now.toLocaleTimeString("en-IN", {
-      timeZone: "Asia/Kolkata"
-    })}`;
-
-  pulse();
-}
-
+init();
