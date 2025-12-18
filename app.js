@@ -1,11 +1,15 @@
-/* ================= CONFIG ================= */
+/************************************************************
+ * FITNESS OS — CANONICAL CORE (QA-SAFE, LLM-SAFE)
+ * Timezone: IST (Asia/Kolkata)
+ ************************************************************/
 
-const TARGET_DATE = new Date("2026-03-31");
-const START_DATE = new Date("2025-12-18");
+/* ================= CONSTANTS ================= */
 
+const TZ = "Asia/Kolkata";
 const BASE_SLEEP_HOURS = 8;
+const STORAGE_PREFIX = "day:";
 
-/* ================= UTIL ================= */
+/* ================= UTILITIES ================= */
 
 function todayKey(offset = 0) {
   const d = new Date();
@@ -13,15 +17,13 @@ function todayKey(offset = 0) {
   return d.toISOString().slice(0, 10);
 }
 
-function nowIST() {
-  return new Date().toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+function nowISO() {
+  return new Date().toISOString();
 }
 
 function pulse() {
   const bar = document.getElementById("progressBar");
+  if (!bar) return;
   bar.style.opacity = 1;
   bar.style.width = "90%";
   setTimeout(() => {
@@ -33,138 +35,242 @@ function pulse() {
   }, 200);
 }
 
+/* ================= DAY RECORD ================= */
+
+function createEmptyDay(date) {
+  return {
+    meta: {
+      date,
+      timezone: TZ,
+      state: "IDLE",
+      created_at: nowISO(),
+      last_updated_at: nowISO()
+    },
+
+    plan: {
+      sleep: {
+        planned_sleep_time: null,
+        planned_wake_time: null
+      }
+    },
+
+    actuals: {
+      sleep: {
+        sleep_logged_at: null,
+        wake_logged_at: null,
+        sleep_duration_hours: 0,
+        sleep_debt_hours: 0
+      },
+
+      weight: {
+        value_kg: null,
+        logged_at: null
+      },
+
+      hydration: {
+        windows: {
+          morning: { actual_ml: 0, logged_at: null, status: "missed" },
+          late_morning: { actual_ml: 0, logged_at: null, status: "missed" },
+          afternoon: { actual_ml: 0, logged_at: null, status: "missed" },
+          workout: { actual_ml: 0, logged_at: null, status: "missed" },
+          evening: { actual_ml: 0, logged_at: null, status: "missed" }
+        },
+        total_ml: 0
+      },
+
+      nutrition: {
+        meals: {},
+        total_calories: 0
+      },
+
+      workout: {
+        sets: [],
+        started_at: null,
+        ended_at: null,
+        duration_minutes: 0
+      }
+    },
+
+    kpis: {},
+    confidence: {
+      overall: "low",
+      reasons: []
+    }
+  };
+}
+
+/* ================= STORAGE ================= */
+
+function loadDay(date) {
+  const key = STORAGE_PREFIX + date;
+  const raw = localStorage.getItem(key);
+  if (raw) return JSON.parse(raw);
+
+  const day = createEmptyDay(date);
+  saveDay(day);
+  return day;
+}
+
+function saveDay(day) {
+  day.meta.last_updated_at = nowISO();
+  localStorage.setItem(STORAGE_PREFIX + day.meta.date, JSON.stringify(day));
+}
+
+/* ================= STATE MACHINE GUARDS ================= */
+
+function canLogSleep(day) {
+  return day.meta.state === "PLANNED";
+}
+
+function canLogWake(day) {
+  return day.meta.state === "SLEEPING";
+}
+
+function canLogWeight(day) {
+  return day.actuals.weight.value_kg === null;
+}
+
+function canLogHydration(day, windowId) {
+  return day.actuals.hydration.windows[windowId].status !== "completed";
+}
+
 /* ================= INIT ================= */
 
+let DAY = loadDay(todayKey());
+
 function init() {
-  const now = new Date();
-
-  todayDate.innerText = now.toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  });
-
-  targetDate.innerText = TARGET_DATE.toDateString();
-  dayCount.innerText = `Day ${Math.floor((now - START_DATE) / 86400000)}`;
-
-  plannedSleep.value = localStorage.getItem("plannedSleep") || "";
-  plannedWake.value = localStorage.getItem("plannedWake") || "";
-
-  renderSleepStatus();
-  renderAnalysis();
-  renderHistory();
-  renderTomorrowPlan();
+  renderSleep();
+  renderWeight();
 }
 
 init();
 
-/* ================= TABS ================= */
+/* ================= SLEEP ================= */
 
-function switchTab(tabId) {
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-  document.querySelectorAll(".tab-page").forEach(p => p.classList.remove("active"));
-  document.querySelector(`[onclick*="${tabId}"]`).classList.add("active");
-  document.getElementById(tabId).classList.add("active");
-
-  if (tabId === "analysis") renderAnalysis();
-  if (tabId === "history") renderHistory();
-  if (tabId === "tomorrow") renderTomorrowPlan();
-}
-
-/* ================= SLEEP LOGIC ================= */
-
-function savePlannedSleep() {
-  localStorage.setItem("plannedSleep", plannedSleep.value);
+function savePlannedSleep(time) {
+  DAY.plan.sleep.planned_sleep_time = time || null;
+  DAY.meta.state = "PLANNED";
+  saveDay(DAY);
   pulse();
 }
 
-function savePlannedWake() {
-  localStorage.setItem("plannedWake", plannedWake.value);
+function savePlannedWake(time) {
+  DAY.plan.sleep.planned_wake_time = time || null;
+  DAY.meta.state = "PLANNED";
+  saveDay(DAY);
   pulse();
 }
 
 function logSleep() {
-  localStorage.setItem(`sleep-${todayKey()}`, new Date().toISOString());
-  renderSleepStatus();
+  if (!canLogSleep(DAY)) return;
+
+  DAY.actuals.sleep.sleep_logged_at = nowISO();
+  DAY.meta.state = "SLEEPING";
+  saveDay(DAY);
+  renderSleep();
   pulse();
 }
 
 function logWake() {
-  localStorage.setItem(`wake-${todayKey()}`, new Date().toISOString());
-  renderSleepStatus();
+  if (!canLogWake(DAY)) return;
+
+  DAY.actuals.sleep.wake_logged_at = nowISO();
+
+  const start = new Date(DAY.actuals.sleep.sleep_logged_at);
+  const end = new Date(DAY.actuals.sleep.wake_logged_at);
+
+  const hours = Math.max(0, (end - start) / 36e5);
+  DAY.actuals.sleep.sleep_duration_hours = Number(hours.toFixed(2));
+  DAY.actuals.sleep.sleep_debt_hours = Math.max(
+    0,
+    BASE_SLEEP_HOURS - DAY.actuals.sleep.sleep_duration_hours
+  );
+
+  DAY.meta.state = "AWAKE";
+  saveDay(DAY);
+  renderSleep();
   pulse();
 }
 
-function renderSleepStatus() {
-  const sleep = localStorage.getItem(`sleep-${todayKey()}`);
-  const wake = localStorage.getItem(`wake-${todayKey()}`);
-
-  sleepDisplay.innerText = sleep ? `Sleep: ${new Date(sleep).toLocaleTimeString("en-IN")}` : "Sleep: –";
-  wakeDisplay.innerText = wake ? `Wake: ${new Date(wake).toLocaleTimeString("en-IN")}` : "Wake: –";
-
-  if (sleep && wake) {
-    const duration =
-      (new Date(wake) - new Date(sleep)) / 3600000;
-
-    const kpi = {
-      date: todayKey(),
-      sleep_hours: Number(duration.toFixed(2)),
-      sleep_debt: Number((BASE_SLEEP_HOURS - duration).toFixed(2))
-    };
-
-    localStorage.setItem(`kpi-${todayKey()}`, JSON.stringify(kpi));
+function renderSleep() {
+  const s = DAY.actuals.sleep;
+  if (document.getElementById("sleepDisplay")) {
+    document.getElementById("sleepDisplay").innerText =
+      s.sleep_logged_at ? "Sleep logged" : "Sleep: –";
+  }
+  if (document.getElementById("wakeDisplay")) {
+    document.getElementById("wakeDisplay").innerText =
+      s.wake_logged_at ? "Wake logged" : "Wake: –";
   }
 }
 
-/* ================= ANALYSIS ================= */
+/* ================= WEIGHT ================= */
 
-function renderAnalysis() {
-  const el = document.getElementById("analysis");
-  const kpi = JSON.parse(localStorage.getItem(`kpi-${todayKey()}`) || "{}");
+function logWeight(value) {
+  if (!canLogWeight(DAY)) return;
 
-  el.innerHTML = `
-    <div class="card">
-      <h2>Analysis</h2>
-      <p><strong>Sleep Duration:</strong> ${kpi.sleep_hours || "–"} hrs</p>
-      <p><strong>Sleep Debt:</strong> ${kpi.sleep_debt || "–"} hrs</p>
-    </div>
-  `;
+  const regex = /^(?:[3-9][0-9]|1[0-9]{2})(?:\.[0-9])?$/;
+  if (!regex.test(value)) return;
+
+  DAY.actuals.weight.value_kg = Number(value);
+  DAY.actuals.weight.logged_at = nowISO();
+  saveDay(DAY);
+  renderWeight();
+  pulse();
 }
 
-/* ================= HISTORY ================= */
+function renderWeight() {
+  const w = DAY.actuals.weight;
+  if (!document.getElementById("weightDisplay")) return;
+  document.getElementById("weightDisplay").innerText =
+    w.value_kg !== null ? `Weight: ${w.value_kg} kg` : "Weight: –";
+}
 
-function renderHistory() {
-  const el = document.getElementById("history");
-  let html = `<div class="card"><h2>History</h2>`;
+/* ================= HYDRATION ================= */
+
+function logHydration(windowId, ml) {
+  if (!canLogHydration(DAY, windowId)) return;
+
+  DAY.actuals.hydration.windows[windowId] = {
+    actual_ml: ml,
+    logged_at: nowISO(),
+    status: "completed"
+  };
+
+  DAY.actuals.hydration.total_ml = Object.values(
+    DAY.actuals.hydration.windows
+  ).reduce((a, w) => a + w.actual_ml, 0);
+
+  saveDay(DAY);
+  pulse();
+}
+
+/* ================= EXPORT ================= */
+
+function exportCSV() {
+  const rows = [["date", "weight_kg", "sleep_hours", "hydration_ml"]];
 
   Object.keys(localStorage)
-    .filter(k => k.startsWith("kpi-"))
+    .filter(k => k.startsWith(STORAGE_PREFIX))
     .sort()
     .forEach(key => {
-      const kpi = JSON.parse(localStorage.getItem(key));
-      html += `<div>${kpi.date} — Sleep: ${kpi.sleep_hours}h</div>`;
+      const d = JSON.parse(localStorage.getItem(key));
+      rows.push([
+        d.meta.date,
+        d.actuals.weight.value_kg ?? "",
+        d.actuals.sleep.sleep_duration_hours,
+        d.actuals.hydration.total_ml
+      ]);
     });
 
-  html += `</div>`;
-  el.innerHTML = html;
-}
+  const csv = rows.map(r => r.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
 
-/* ================= TOMORROW ================= */
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "fitness_ground_truth.csv";
+  a.click();
 
-function renderTomorrowPlan() {
-  const el = document.getElementById("tomorrow");
-  const kpi = JSON.parse(localStorage.getItem(`kpi-${todayKey()}`) || {});
-
-  const note =
-    kpi.sleep_debt > 1
-      ? "Reduce workout intensity slightly"
-      : "Proceed with planned intensity";
-
-  el.innerHTML = `
-    <div class="card">
-      <h2>Tomorrow’s Plan</h2>
-      <p><strong>Sleep-based adjustment:</strong> ${note}</p>
-    </div>
-  `;
+  URL.revokeObjectURL(url);
 }
